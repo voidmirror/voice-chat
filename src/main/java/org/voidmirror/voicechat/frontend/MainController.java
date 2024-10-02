@@ -56,8 +56,9 @@ public class MainController {
 
     public void onServerStart() {
         int port = 9009;
-        Thread receive = new Thread(new Sender(port));
-        receive.start();
+        Thread send = new Thread(new Sender(port));
+        send.setDaemon(true);
+        send.start();
     }
 
     public void onDisconnectClient() {
@@ -69,11 +70,16 @@ public class MainController {
     }
 
     private void connect() {
-        String getHost = tfHost.getText();
-        String host = Pattern.matches("^\\d+\\.\\d+\\.\\d+\\.\\d+", getHost) ? getHost : "127.0.0.1";
+        String getHost = tfHost.getText()
+                .replaceAll(" ", "")
+                .replaceAll("\\.+", ".");
+        String host = Pattern.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", getHost)
+                ? getHost
+                : "127.0.0.1";
         System.out.println("### Host is " + host);
         int port = 9009;
         Thread receive = new Thread(new Receiver(host, port));
+        receive.setDaemon(true);
         receive.start();
     }
 
