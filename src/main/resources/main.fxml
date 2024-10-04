@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <GridPane alignment="center" hgap="10" vgap="10" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.voidmirror.voicechat.frontend.MainController">
@@ -13,12 +14,13 @@
    <children>
       <AnchorPane fx:id="backgroundPane" prefHeight="200.0" prefWidth="333.0">
          <children>
-            <Button fx:id="btnServerStart" layoutX="133.0" layoutY="23.0" mnemonicParsing="false" onMouseClicked="#onServerStart" text="Start Server" />
+            <Button fx:id="btnStartServer" layoutX="133.0" layoutY="23.0" mnemonicParsing="false" onMouseClicked="#onServerStart" text="Start Server" />
             <Button fx:id="btnDisconnectServer" layoutX="117.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#onDisconnectServer" text="Server Disconnect" />
             <Button fx:id="btnConnect" layoutX="142.0" layoutY="129.0" mnemonicParsing="false" onMouseClicked="#onConnect" text="Connect" />
             <Button fx:id="btnDisconnect" layoutX="135.0" layoutY="161.0" mnemonicParsing="false" onMouseClicked="#onDisconnectClient" text="Disconnect" />
             <TextField fx:id="tfHost" layoutX="98.0" layoutY="100.0" promptText="Host" />
             <Separator layoutX="72.0" layoutY="89.0" prefWidth="200.0" />
+            <ImageView fx:id="connectionStatus" fitHeight="25.0" fitWidth="25.0" layoutX="214.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true" />
 
          </children>
       </AnchorPane>
