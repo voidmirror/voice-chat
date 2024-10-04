@@ -113,7 +113,7 @@ class Receiver implements Runnable {
 //        if (size > 3072) return 4096;
 //        if (size > 2048) return 3072;
 //        if (size > 1024) return 2048;
-        return 1024;
+        return 4096;
     }
 
     @Override
@@ -130,9 +130,6 @@ class Receiver implements Runnable {
             speakers.open(format);
             speakers.start();
 
-//            System.out.println(inInfo);
-//            System.out.println(speakers);
-
             OutputStream out = socket.getOutputStream();
             microphone = AudioSystem.getTargetDataLine(format);
             DataLine.Info outInfo = new DataLine.Info(TargetDataLine.class, format);
@@ -140,34 +137,31 @@ class Receiver implements Runnable {
             microphone.open(format);
             microphone.start();
 
-//            System.out.println(outInfo);
-//            System.out.println(microphone);
-//            System.out.println();
-
-//            byte[] inputBuffer = new byte[1024/* * format.getFrameSize()*/];
-//            byte[] outputBuffer = new byte[1024/* * format.getFrameSize()*/];
-//
-//            int bufferVarInput = 0;
-//            int bufferVarOutput = 0;
-
             Thread speakerThread = new Thread(() -> {
-                byte[] inputBuffer = new byte[1024/* * format.getFrameSize()*/];
+                byte[] inputBuffer = new byte[4096];
                 int bufferVarInput = 0;
                 try {
+                    // TODO: if lags are in case of corrupted bytes, change roundSize -> continue
                     while ((bufferVarInput = in.read(inputBuffer)) > 0) {
-                        speakers.write(inputBuffer, 0, ((bufferVarInput != 0) && ((bufferVarInput & (bufferVarInput - 1)) == 0)) ? bufferVarInput : roundSize(bufferVarInput));
+                        speakers.write(
+                                inputBuffer,
+                                0, (
+                                        ((bufferVarInput & (bufferVarInput - 1)) == 0))
+                                        ? bufferVarInput
+                                        : roundSize(bufferVarInput)
+                        );
                     }
                 } catch (IOException e) {
                     System.out.println("### IO read exception");
                 }
             });
             Thread microphoneThread = new Thread(new Runnable() {
-                byte[] outputBuffer = new byte[1024/* * format.getFrameSize()*/];
+                final byte[] outputBuffer = new byte[4096];
                 int bufferVarOutput = 0;
                 @Override
                 public void run() {
                     try {
-                        while ((bufferVarOutput = microphone.read(outputBuffer, 0, 1024)) > 0 ) {
+                        while ((bufferVarOutput = microphone.read(outputBuffer, 0, 4096)) > 0 ) {
                             out.write(outputBuffer, 0, bufferVarOutput);
                         }
                     } catch (IOException e) {
@@ -184,15 +178,6 @@ class Receiver implements Runnable {
                 btnConnect.setDisable(true);
                 tfHost.setDisable(true);
             });
-
-//            while (
-//                    ((bufferVarInput = in.read(inputBuffer)) > 0 || (bufferVarOutput = microphone.read(outputBuffer, 0, 1024)) > 0)
-//            ) {
-////                System.out.println(bufferVarInput + Arrays.toString(inputBuffer));
-////                System.out.println(bufferVarOutput + Arrays.toString(outputBuffer));
-//                out.write(outputBuffer, 0, bufferVarOutput);
-//                speakers.write(inputBuffer, 0, ((bufferVarInput != 0) && ((bufferVarInput & (bufferVarInput - 1)) == 0)) ? bufferVarInput : roundSize(bufferVarInput));
-//            }
 
         } catch (IOException | LineUnavailableException e) {
             System.out.println("### Runtime exception");
@@ -220,7 +205,7 @@ class Sender implements Runnable {
 //        if (size > 3072) return 4096;
 //        if (size > 2048) return 3072;
 //        if (size > 1024) return 2048;
-        return 1024;
+        return 4096;
     }
 
     @Override
@@ -256,33 +241,30 @@ class Sender implements Runnable {
             microphone.open(format);
             microphone.start();
 
-//            System.out.println(outInfo);
-//            System.out.println(microphone);
-
-//            byte[] inputBuffer = new byte[1024/* * format.getFrameSize()*/];
-//            byte[] outputBuffer = new byte[1024/* * format.getFrameSize()*/];
-//
-//            int bufferVarInput = 0;
-//            int bufferVarOutput = 0;
-
             Thread speakerThread = new Thread(() -> {
-                byte[] inputBuffer = new byte[1024/* * format.getFrameSize()*/];
+                byte[] inputBuffer = new byte[4096/*1024 * format.getFrameSize()*/];
                 int bufferVarInput = 0;
                 try {
                     while ((bufferVarInput = in.read(inputBuffer)) > 0) {
-                        speakers.write(inputBuffer, 0, ((bufferVarInput != 0) && ((bufferVarInput & (bufferVarInput - 1)) == 0)) ? bufferVarInput : roundSize(bufferVarInput));
+                        speakers.write(
+                                inputBuffer,
+                                0,
+                                ((bufferVarInput & (bufferVarInput - 1)) == 0)
+                                        ? bufferVarInput
+                                        : roundSize(bufferVarInput)
+                        );
                     }
                 } catch (IOException e) {
                     System.out.println("### IO read exception");
                 }
             });
             Thread microphoneThread = new Thread(new Runnable() {
-                byte[] outputBuffer = new byte[1024/* * format.getFrameSize()*/];
+                final byte[] outputBuffer = new byte[4096/*1024 * format.getFrameSize()*/];
                 int bufferVarOutput = 0;
                 @Override
                 public void run() {
                     try {
-                        while ((bufferVarOutput = microphone.read(outputBuffer, 0, 1024)) > 0 ) {
+                        while ((bufferVarOutput = microphone.read(outputBuffer, 0, 4096)) > 0) {
                             out.write(outputBuffer, 0, bufferVarOutput);
                         }
                     } catch (IOException e) {
@@ -294,16 +276,6 @@ class Sender implements Runnable {
             microphoneThread.setDaemon(true);
             speakerThread.start();
             microphoneThread.start();
-
-//            while (
-//                    ((bufferVarOutput = microphone.read(outputBuffer, 0, 1024)) > 0 || (bufferVarInput = in.read(inputBuffer)) > 0)
-//            ) {
-////                System.out.println(bufferVarInput + Arrays.toString(inputBuffer));
-////                System.out.println(bufferVarOutput + Arrays.toString(outputBuffer));
-//                out.write(outputBuffer, 0, bufferVarOutput);
-//                speakers.write(inputBuffer, 0, ((bufferVarInput != 0) && ((bufferVarInput & (bufferVarInput - 1)) == 0)) ? bufferVarInput : roundSize(bufferVarInput));
-//            }
-
 
         } catch (IOException | LineUnavailableException e) {
             throw new RuntimeException(e);
