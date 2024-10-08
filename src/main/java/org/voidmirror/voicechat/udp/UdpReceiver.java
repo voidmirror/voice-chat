@@ -39,6 +39,8 @@ public class UdpReceiver implements Runnable{
             speakers.open(format);
             speakers.start();
 
+            System.out.println(datagramSocket.isBound());
+
             Thread speakerThread = new Thread(() -> {
 //                byte[] inputBuffer = new byte[8192];
                 int bufferVarInput = udpInputBuffer.length;

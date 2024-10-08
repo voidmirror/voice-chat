@@ -8,6 +8,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import org.voidmirror.voicechat.udp.UdpChoreographer;
+import org.voidmirror.voicechat.udp.UdpReceiver;
+import org.voidmirror.voicechat.udp.UdpSender;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -59,10 +62,25 @@ public class MainController {
     }
 
     public void onServerStart() {
-        int port = 9009;
-        Thread send = new Thread(new Sender(port, connectionStatus, btnStartServer));
-        send.setDaemon(true);
-        send.start();
+//        int port = 9009;
+//        Thread send = new Thread(new Sender(port, connectionStatus, btnStartServer));
+//        send.setDaemon(true);
+//        send.start();
+
+        // TEST
+        /* TODO: now server needs host too (?) Need UdpChoreographer to receive first Socket connection
+            to retrieve ip of client
+         */
+
+        int serverReceivePort = 9010;
+        int serverSendPort = 9009;
+        Thread udpReceive = new Thread(new UdpReceiver(serverReceivePort));
+        Thread udpSend = new Thread(new UdpSender(serverSendPort, tfHost.getText()));
+        udpReceive.start();
+        udpSend.start();
+
+        UdpChoreographer udpChoreographer = new UdpChoreographer();
+        udpChoreographer.waitConnection(9123);
     }
 
     public void onDisconnectClient() {
@@ -74,17 +92,28 @@ public class MainController {
     }
 
     private void connect() {
-        String getHost = tfHost.getText()
-                .replaceAll(" ", "")
-                .replaceAll("\\.+", ".");
-        String host = Pattern.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", getHost)
-                ? getHost
-                : "127.0.0.1";
-        System.out.println("### Host is " + host);
-        int port = 9009;
-        Thread receive = new Thread(new Receiver(host, port, btnConnect, tfHost));
-        receive.setDaemon(true);
-        receive.start();
+//        String getHost = tfHost.getText()
+//                .replaceAll(" ", "")
+//                .replaceAll("\\.+", ".");
+//        String host = Pattern.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", getHost)
+//                ? getHost
+//                : "127.0.0.1";
+//        System.out.println("### Host is " + host);
+//        int port = 9009;
+//        Thread receive = new Thread(new Receiver(host, port, btnConnect, tfHost));
+//        receive.setDaemon(true);
+//        receive.start();
+
+        // TEST
+        int clientReceivePort = 9009;
+        int clientSendPort = 9010;
+        Thread udpReceive = new Thread(new UdpReceiver(clientReceivePort));
+        Thread udpSend = new Thread(new UdpSender(clientSendPort, tfHost.getText()));
+        udpReceive.start();
+        udpSend.start();
+
+        UdpChoreographer udpChoreographer = new UdpChoreographer();
+        udpChoreographer.findServer(tfHost.getText(), 9123);
     }
 
     public void closeApp() {
