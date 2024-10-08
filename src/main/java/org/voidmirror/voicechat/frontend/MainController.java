@@ -240,7 +240,8 @@ class Sender implements Runnable {
                         }
                     }
                 } catch (IOException e) {
-                    System.out.println("### IO read exception");
+                    System.out.println("### SPEAKER IO read exception");
+                    e.printStackTrace();
                 }
             });
             Thread microphoneThread = new Thread(new Runnable() {
@@ -253,7 +254,8 @@ class Sender implements Runnable {
                             out.write(outputBuffer, 0, bufferVarOutput);
                         }
                     } catch (IOException e) {
-                        System.out.println("### IO read exception");
+                        System.out.println("### MICROPHONE IO read exception");
+                        e.printStackTrace();
                     }
                 }
             });
@@ -262,8 +264,11 @@ class Sender implements Runnable {
             speakerThread.start();
             microphoneThread.start();
 
+
         } catch (IOException | LineUnavailableException e) {
-            throw new RuntimeException(e);
+            System.out.println("### SENDER exception");
+            e.printStackTrace();
+//            throw new RuntimeException(e);
         }
     }
 }
