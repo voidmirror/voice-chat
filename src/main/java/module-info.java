@@ -4,6 +4,8 @@ module voice.chat {
     requires javafx.graphics;
     requires javafx.base;
     requires java.desktop;
+    requires static lombok;
     exports org.voidmirror.voicechat;
+    exports org.voidmirror.voicechat.model;
     opens org.voidmirror.voicechat.frontend to javafx.fxml;
 }

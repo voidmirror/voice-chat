@@ -8,9 +8,8 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import org.voidmirror.voicechat.model.ConnectionData;
 import org.voidmirror.voicechat.udp.UdpChoreographer;
-import org.voidmirror.voicechat.udp.UdpReceiver;
-import org.voidmirror.voicechat.udp.UdpSender;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -24,7 +23,6 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
-import java.util.regex.Pattern;
 
 public class MainController {
 
@@ -72,15 +70,19 @@ public class MainController {
             to retrieve ip of client
          */
 
-        int serverReceivePort = 9010;
-        int serverSendPort = 9009;
-        Thread udpReceive = new Thread(new UdpReceiver(serverReceivePort));
-        Thread udpSend = new Thread(new UdpSender(serverSendPort, tfHost.getText()));
-        udpReceive.start();
-        udpSend.start();
+        int serverLocalPort = 9034;
+        int remotePort = 9033; // same as client receive
+//        Thread udpReceive = new Thread(new UdpReceiver(serverReceivePort));
+//        Thread udpSend = new Thread(new UdpSender(serverSendPort, tfHost.getText()));
+//        udpReceive.start();
+//        udpSend.start();
 
         UdpChoreographer udpChoreographer = new UdpChoreographer();
-        udpChoreographer.waitConnection(9123);
+//        udpChoreographer.waitConnection(9123);
+        ConnectionData connectionData = new ConnectionData();
+        connectionData.setLocalPort(serverLocalPort);
+        connectionData.setRemotePort(remotePort);
+        udpChoreographer.startUdpServer(connectionData);
     }
 
     public void onDisconnectClient() {
@@ -105,15 +107,32 @@ public class MainController {
 //        receive.start();
 
         // TEST
-        int clientReceivePort = 9009;
-        int clientSendPort = 9010;
-        Thread udpReceive = new Thread(new UdpReceiver(clientReceivePort));
-        Thread udpSend = new Thread(new UdpSender(clientSendPort, tfHost.getText()));
-        udpReceive.start();
-        udpSend.start();
+//        int clientReceivePort = 9009;
+//        int clientSendPort = 9010;
+//        Thread udpReceive = new Thread(new UdpReceiver(clientReceivePort));
+//        Thread udpSend = new Thread(new UdpSender(clientSendPort, tfHost.getText()));
+//        udpReceive.start();
+//        udpSend.start();
+
+        int localPort = 9033;
+        int serverPort = 9034;
+
+        // TEST SECTION
+//        int localPort = 9043;
+//        int serverPort = 9034;
+        // TEST SECTION
+
+        // TODO: manage port nums
 
         UdpChoreographer udpChoreographer = new UdpChoreographer();
-        udpChoreographer.findServer(tfHost.getText(), 9123);
+//        udpChoreographer.findServer(tfHost.getText(), 9123);
+        ConnectionData connectionData = new ConnectionData();
+        connectionData.setLocalPort(localPort);
+        connectionData.setRemotePort(serverPort);
+        connectionData.setRemoteHost(tfHost.getText());
+        udpChoreographer.startUdpClient(connectionData);
+//        Thread thread = new Thread(() -> udpChoreographer.startUdpClient(connectionData));
+//        thread.start();
     }
 
     public void closeApp() {

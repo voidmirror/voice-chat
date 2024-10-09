@@ -45,16 +45,16 @@ public class UdpReceiver implements Runnable{
 //                byte[] inputBuffer = new byte[8192];
                 int bufferVarInput = udpInputBuffer.length;
                 try {
-                    while (datagramSocket.isConnected()) {
+                    while (datagramSocket.isBound()) {  // TODO: isBound() / isConnected() ?
                         datagramSocket.receive(dp);
-                        System.out.println(Arrays.toString(dp.getData()));
+//                        System.out.println(Arrays.toString(dp.getData()));
 
                         // TODO: uncomment
-//                        speakers.write(
-//                                dp.getData(),
-//                                0,
-//                                bufferVarInput
-//                        );
+                        speakers.write(
+                                dp.getData(),
+                                0,
+                                bufferVarInput
+                        );
                     }
                 } catch (IOException e) {
                     System.out.println("### IO read exception");
@@ -67,6 +67,7 @@ public class UdpReceiver implements Runnable{
 
 
         } catch (SocketException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         } catch (LineUnavailableException e) {
             throw new RuntimeException(e);

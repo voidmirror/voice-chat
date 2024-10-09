@@ -50,13 +50,14 @@ public class UdpSender implements Runnable{
 
                 @Override
                 public void run() {
-                    while (datagramSocket.isConnected()) {
+                    while (datagramSocket.isBound()) {  // TODO: isBound() / isConnected() ?
                         microphone.read(outputBuffer, 0, 8192);
                         dp.setData(outputBuffer, 0, 8192);
-                        System.out.println(Arrays.toString(dp.getData()));
+//                        System.out.println(Arrays.toString(dp.getData()));
                         try {
                             datagramSocket.send(dp);
                         } catch (IOException e) {
+                            e.printStackTrace();
                             throw new RuntimeException(e);
                         }
                     }
@@ -70,6 +71,7 @@ public class UdpSender implements Runnable{
 
 
         } catch (SocketException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         } catch (LineUnavailableException e) {
             throw new RuntimeException(e);
