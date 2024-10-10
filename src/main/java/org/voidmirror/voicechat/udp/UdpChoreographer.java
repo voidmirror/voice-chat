@@ -21,7 +21,6 @@ public class UdpChoreographer {
 
     public void startUdpServer(ConnectionData connectionData) {
 
-//        CompletableFuture<Boolean> start = new CompletableFuture<>();
         ConnectionState state = new ConnectionState();
         try {
             DatagramSocket datagramSocketFirstReceive = new DatagramSocket(connectionData.getLocalPort());
@@ -45,26 +44,24 @@ public class UdpChoreographer {
                             connectionPermission, connectionPermission.length,
                             InetAddress.getByName(connectionData.getRemoteHost()), connectionData.getRemotePort());
                     System.out.println(dpSend.toString());
-//                    System.out.println("### Future async Received Before Sleep");
-//                    Thread.sleep(2000);
-//                    System.out.println("### Future async Received After Sleep");
+                    System.out.println("### Future async Received Before Sleep");
+                    Thread.sleep(2000);
+                    System.out.println("### Future async Received After Sleep");
                     datagramSocketFirstSend.send(dpSend);
-//                    System.out.println("### Future async After send");
+                    System.out.println("### Future async After send");
 
                     return dpRec.getSocketAddress();
                 } catch (IOException e) {
                     e.printStackTrace();
                     throw new RuntimeException(e);
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
                 }
             });
             start.whenCompleteAsync((address, throwable) -> {
-//                System.out.println("Address: " + address.toString());
-//                System.out.println("When Complete Async started");
                 datagramSocketFirstReceive.close();
                 datagramSocketFirstSend.close();
-//                System.out.println(address.toString());
-                System.out.println(connectionData);
-//                connectionData.setRemoteHost(address.toString());
+                System.out.println("When Complete " +connectionData);
                 Thread receiver = new Thread(new UdpReceiver(connectionData.getLocalPort()));
                 Thread sender = new Thread(new UdpSender(connectionData.getRemotePort(), connectionData.getRemoteHost()));
                 receiver.setDaemon(true);
@@ -114,6 +111,8 @@ public class UdpChoreographer {
                 }
             });
             pingServer.whenComplete((str, throwable) -> {
+                datagramSocketFirstReceive.close();
+                datagramSocketFirstSend.close();
                 Thread receiver = new Thread(new UdpReceiver(connectionData.getLocalPort()));
                 Thread sender = new Thread(new UdpSender(connectionData.getRemotePort(), connectionData.getRemoteHost()));
                 receiver.setDaemon(true);
