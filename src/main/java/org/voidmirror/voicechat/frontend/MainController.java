@@ -8,6 +8,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
 import org.voidmirror.voicechat.model.ConnectionData;
 import org.voidmirror.voicechat.udp.UdpChoreographer;
 
@@ -23,6 +24,7 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.regex.Pattern;
 
 public class MainController {
 
@@ -37,13 +39,26 @@ public class MainController {
     @FXML
     private Button btnDisconnectServer;
     @FXML
+    private Button btnMinimize;
+    @FXML
     private TextField tfHost;
     @FXML
-    private ImageView connectionStatus;
+    private ImageView ivServerConnectionStatus;
+
+    private FrontSwitcher frontSwitcher;
 
 
     public void initialize() {
         onMouseDragEntered();
+
+        frontSwitcher = FrontSwitcher.getInstance();
+        frontSwitcher
+                .addButtonToHolder(btnConnect, btnConnect.getId())
+                .addButtonToHolder(btnStartServer, btnStartServer.getId())
+                .addButtonToHolder(btnDisconnectServer, btnDisconnectServer.getId())
+                .addButtonToHolder(btnDisconnect, btnDisconnect.getId())
+
+                .addImageViewToHolder(ivServerConnectionStatus, ivServerConnectionStatus.getId());
     }
 
     public void onMouseDragEntered() {
@@ -55,30 +70,21 @@ public class MainController {
         });
     }
 
+    public void onMinimize() {
+        ((Stage) btnMinimize.getScene().getWindow()).setIconified(true);
+    }
+
     public void onConnect() {
         connect();
     }
 
     public void onServerStart() {
-//        int port = 9009;
-//        Thread send = new Thread(new Sender(port, connectionStatus, btnStartServer));
-//        send.setDaemon(true);
-//        send.start();
-
-        // TEST
-        /* TODO: now server needs host too (?) Need UdpChoreographer to receive first Socket connection
-            to retrieve ip of client
-         */
-
         int serverLocalPort = 9034;
         int remotePort = 9033; // same as client receive
-//        Thread udpReceive = new Thread(new UdpReceiver(serverReceivePort));
-//        Thread udpSend = new Thread(new UdpSender(serverSendPort, tfHost.getText()));
-//        udpReceive.start();
-//        udpSend.start();
+
+        btnStartServer.setDisable(true);
 
         UdpChoreographer udpChoreographer = new UdpChoreographer();
-//        udpChoreographer.waitConnection(9123);
         ConnectionData connectionData = new ConnectionData();
         connectionData.setLocalPort(serverLocalPort);
         connectionData.setRemotePort(remotePort);
@@ -94,45 +100,25 @@ public class MainController {
     }
 
     private void connect() {
-//        String getHost = tfHost.getText()
-//                .replaceAll(" ", "")
-//                .replaceAll("\\.+", ".");
-//        String host = Pattern.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", getHost)
-//                ? getHost
-//                : "127.0.0.1";
-//        System.out.println("### Host is " + host);
-//        int port = 9009;
-//        Thread receive = new Thread(new Receiver(host, port, btnConnect, tfHost));
-//        receive.setDaemon(true);
-//        receive.start();
-
-        // TEST
-//        int clientReceivePort = 9009;
-//        int clientSendPort = 9010;
-//        Thread udpReceive = new Thread(new UdpReceiver(clientReceivePort));
-//        Thread udpSend = new Thread(new UdpSender(clientSendPort, tfHost.getText()));
-//        udpReceive.start();
-//        udpSend.start();
+        String getHost = tfHost.getText()
+                .replaceAll(" ", "")
+                .replaceAll("\\.+", ".");
+        String host = Pattern.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$", getHost)
+                ? getHost.strip()
+                : "127.0.0.1";
 
         int localPort = 9033;
         int serverPort = 9034;
 
-        // TEST SECTION
-//        int localPort = 9043;
-//        int serverPort = 9034;
-        // TEST SECTION
-
-        // TODO: manage port nums
+        btnConnect.setDisable(true);
+        tfHost.setDisable(true);
 
         UdpChoreographer udpChoreographer = new UdpChoreographer();
-//        udpChoreographer.findServer(tfHost.getText(), 9123);
         ConnectionData connectionData = new ConnectionData();
         connectionData.setLocalPort(localPort);
         connectionData.setRemotePort(serverPort);
         connectionData.setRemoteHost(tfHost.getText());
         udpChoreographer.startUdpClient(connectionData);
-//        Thread thread = new Thread(() -> udpChoreographer.startUdpClient(connectionData));
-//        thread.start();
     }
 
     public void closeApp() {

@@ -5,14 +5,10 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
-import javax.sound.sampled.TargetDataLine;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.Arrays;
 
 public class UdpReceiver implements Runnable{
     public UdpReceiver(int port) {
@@ -21,14 +17,13 @@ public class UdpReceiver implements Runnable{
 
     private final int port;
     private SourceDataLine speakers;
-    private TargetDataLine microphone = null;
 
     @Override
     public void run() {
 
         try {
             DatagramSocket datagramSocket = new DatagramSocket(port);
-            final byte[] udpInputBuffer = new byte[8192];
+            final byte[] udpInputBuffer = new byte[1024];
 
             DatagramPacket dp = new DatagramPacket(udpInputBuffer, udpInputBuffer.length);
 
@@ -39,15 +34,11 @@ public class UdpReceiver implements Runnable{
             speakers.open(format);
             speakers.start();
 
-            System.out.println(datagramSocket.isBound());
-
             Thread speakerThread = new Thread(() -> {
-//                byte[] inputBuffer = new byte[8192];
                 int bufferVarInput = udpInputBuffer.length;
                 try {
                     while (datagramSocket.isBound()) {  // TODO: isBound() / isConnected() ?
                         datagramSocket.receive(dp);
-//                        System.out.println(Arrays.toString(dp.getData()));
 
                         // TODO: uncomment
                         speakers.write(
@@ -70,6 +61,7 @@ public class UdpReceiver implements Runnable{
             e.printStackTrace();
             throw new RuntimeException(e);
         } catch (LineUnavailableException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
 

@@ -4,7 +4,6 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
-import javax.sound.sampled.SourceDataLine;
 import javax.sound.sampled.TargetDataLine;
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -12,7 +11,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 public class UdpSender implements Runnable{
 
@@ -34,7 +32,7 @@ public class UdpSender implements Runnable{
 
         try {
             DatagramSocket datagramSocket = new DatagramSocket();
-            final byte[] udpOutputBuffer = new byte[8192];
+            final byte[] udpOutputBuffer = new byte[1024];
 
             DatagramPacket dp = new DatagramPacket(udpOutputBuffer, udpOutputBuffer.length, host, port);
 
@@ -46,14 +44,13 @@ public class UdpSender implements Runnable{
             microphone.start();
 
             Thread microphoneThread = new Thread(new Runnable() {
-                final byte[] outputBuffer = new byte[8192];
+                final byte[] outputBuffer = new byte[1024];
 
                 @Override
                 public void run() {
                     while (datagramSocket.isBound()) {  // TODO: isBound() / isConnected() ?
-                        microphone.read(outputBuffer, 0, 8192);
-                        dp.setData(outputBuffer, 0, 8192);
-//                        System.out.println(Arrays.toString(dp.getData()));
+                        microphone.read(outputBuffer, 0, 1024);
+                        dp.setData(outputBuffer, 0, 1024);
                         try {
                             datagramSocket.send(dp);
                         } catch (IOException e) {
@@ -74,6 +71,7 @@ public class UdpSender implements Runnable{
             e.printStackTrace();
             throw new RuntimeException(e);
         } catch (LineUnavailableException e) {
+            e.printStackTrace();
             throw new RuntimeException(e);
         }
     }
