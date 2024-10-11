@@ -8,6 +8,9 @@ import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
+import javafx.stage.Stage;
+import org.voidmirror.voicechat.model.ConnectionData;
+import org.voidmirror.voicechat.udp.UdpChoreographer;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
@@ -36,13 +39,26 @@ public class MainController {
     @FXML
     private Button btnDisconnectServer;
     @FXML
+    private Button btnMinimize;
+    @FXML
     private TextField tfHost;
     @FXML
-    private ImageView connectionStatus;
+    private ImageView ivServerConnectionStatus;
+
+    private FrontSwitcher frontSwitcher;
 
 
     public void initialize() {
         onMouseDragEntered();
+
+        frontSwitcher = FrontSwitcher.getInstance();
+        frontSwitcher
+                .addButtonToHolder(btnConnect, btnConnect.getId())
+                .addButtonToHolder(btnStartServer, btnStartServer.getId())
+                .addButtonToHolder(btnDisconnectServer, btnDisconnectServer.getId())
+                .addButtonToHolder(btnDisconnect, btnDisconnect.getId())
+
+                .addImageViewToHolder(ivServerConnectionStatus, ivServerConnectionStatus.getId());
     }
 
     public void onMouseDragEntered() {
@@ -54,15 +70,25 @@ public class MainController {
         });
     }
 
+    public void onMinimize() {
+        ((Stage) btnMinimize.getScene().getWindow()).setIconified(true);
+    }
+
     public void onConnect() {
         connect();
     }
 
     public void onServerStart() {
-        int port = 9009;
-        Thread send = new Thread(new Sender(port, connectionStatus, btnStartServer));
-        send.setDaemon(true);
-        send.start();
+        int serverLocalPort = 9034;
+        int remotePort = 9033; // same as client receive
+
+        btnStartServer.setDisable(true);
+
+        UdpChoreographer udpChoreographer = new UdpChoreographer();
+        ConnectionData connectionData = new ConnectionData();
+        connectionData.setLocalPort(serverLocalPort);
+        connectionData.setRemotePort(remotePort);
+        udpChoreographer.startUdpServer(connectionData);
     }
 
     public void onDisconnectClient() {
@@ -77,14 +103,22 @@ public class MainController {
         String getHost = tfHost.getText()
                 .replaceAll(" ", "")
                 .replaceAll("\\.+", ".");
-        String host = Pattern.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}", getHost)
-                ? getHost
+        String host = Pattern.matches("^\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}$", getHost)
+                ? getHost.strip()
                 : "127.0.0.1";
-        System.out.println("### Host is " + host);
-        int port = 9009;
-        Thread receive = new Thread(new Receiver(host, port, btnConnect, tfHost));
-        receive.setDaemon(true);
-        receive.start();
+
+        int localPort = 9033;
+        int serverPort = 9034;
+
+        btnConnect.setDisable(true);
+        tfHost.setDisable(true);
+
+        UdpChoreographer udpChoreographer = new UdpChoreographer();
+        ConnectionData connectionData = new ConnectionData();
+        connectionData.setLocalPort(localPort);
+        connectionData.setRemotePort(serverPort);
+        connectionData.setRemoteHost(tfHost.getText());
+        udpChoreographer.startUdpClient(connectionData);
     }
 
     public void closeApp() {

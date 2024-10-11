@@ -18,9 +18,10 @@
             <Button fx:id="btnDisconnectServer" layoutX="117.0" layoutY="54.0" mnemonicParsing="false" onMouseClicked="#onDisconnectServer" text="Server Disconnect" />
             <Button fx:id="btnConnect" layoutX="142.0" layoutY="129.0" mnemonicParsing="false" onMouseClicked="#onConnect" text="Connect" />
             <Button fx:id="btnDisconnect" layoutX="135.0" layoutY="161.0" mnemonicParsing="false" onMouseClicked="#onDisconnectClient" text="Disconnect" />
+            <Button fx:id="btnMinimize" layoutX="254.0" layoutY="11.0" mnemonicParsing="false" onMouseClicked="#onMinimize" text="Minimize" />
             <TextField fx:id="tfHost" layoutX="98.0" layoutY="100.0" promptText="Host" />
             <Separator layoutX="72.0" layoutY="89.0" prefWidth="200.0" />
-            <ImageView fx:id="connectionStatus" fitHeight="25.0" fitWidth="25.0" layoutX="214.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true" />
+            <ImageView fx:id="ivServerConnectionStatus" fitHeight="25.0" fitWidth="25.0" layoutX="214.0" layoutY="23.0" pickOnBounds="true" preserveRatio="true" />
 
          </children>
       </AnchorPane>
