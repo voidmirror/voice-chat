@@ -1,5 +1,7 @@
 package org.voidmirror.voicechat.udp;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -12,6 +14,7 @@ import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 
+@Slf4j
 public class UdpSender implements Runnable{
 
     public UdpSender(int port, String host) {
@@ -64,7 +67,7 @@ public class UdpSender implements Runnable{
             microphoneThread.setDaemon(true);
             microphoneThread.start();
 
-            System.out.println("### UdpSender started");
+            log.info("UdpSender started");
 
 
         } catch (SocketException e) {

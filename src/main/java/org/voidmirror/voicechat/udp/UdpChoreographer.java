@@ -3,6 +3,7 @@ package org.voidmirror.voicechat.udp;
 import javafx.application.Platform;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
 import org.voidmirror.voicechat.model.ConnectionData;
 import org.voidmirror.voicechat.model.ConnectionState;
@@ -17,6 +18,7 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 public class UdpChoreographer {
 
     public void startUdpServer(ConnectionData connectionData) {
@@ -27,8 +29,8 @@ public class UdpChoreographer {
             DatagramPacket dpRec = new DatagramPacket(udpInputBuffer, udpInputBuffer.length);
 
             DatagramSocket datagramSocketFirstSend = new DatagramSocket();
-
-            System.out.println("### Socket created");
+            
+            log.info("Server socket created");
 
             CompletableFuture<SocketAddress> start = CompletableFuture.supplyAsync(() -> {
                 try {
@@ -81,7 +83,7 @@ public class UdpChoreographer {
                     udpOutputBuffer, udpOutputBuffer.length,
                     InetAddress.getByName(connectionData.getRemoteHost()), connectionData.getRemotePort());
 
-            System.out.println("### Socket created");
+            System.out.println("Client socket created");
             CompletableFuture<String> pingServer = CompletableFuture.supplyAsync(() -> {
                 try {
                     datagramSocketFirstSend.send(dpSend);
