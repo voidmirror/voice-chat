@@ -4,9 +4,11 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.regex.Pattern;
 
+@Slf4j
 @Getter
 @NoArgsConstructor
 @ToString
@@ -19,11 +21,10 @@ public class ConnectionData {
     private int localPort;
 
     /**
-     * If remoteHost is not in proper pattern
+     * Check remote host pattern
      * @param remoteHost
      */
     public void setRemoteHost(String remoteHost) {
-        System.out.println("### Incoming remoteHost: " + remoteHost);
         if (remoteHost.equals("localhost")) {
             this.remoteHost = "127.0.0.1";
             return;
@@ -40,9 +41,7 @@ public class ConnectionData {
             while (!Pattern.matches("^\\d.+", builder)) {
                 builder.deleteCharAt(0);
             }
-            this.remoteHost = builder.toString();;
+            this.remoteHost = builder.toString();
         }
-        System.out.println("### Resulted remoteHost: " + this.remoteHost);
-
     }
 }

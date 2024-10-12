@@ -1,5 +1,7 @@
 package org.voidmirror.voicechat.udp;
 
+import lombok.extern.slf4j.Slf4j;
+
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
@@ -10,6 +12,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 
+@Slf4j
 public class UdpReceiver implements Runnable{
     public UdpReceiver(int port) {
         this.port = port;
@@ -48,13 +51,13 @@ public class UdpReceiver implements Runnable{
                         );
                     }
                 } catch (IOException e) {
-                    System.out.println("### IO read exception");
+                    log.error("### IO read exception");
                 }
             });
             speakerThread.setDaemon(true);
             speakerThread.start();
 
-            System.out.println("### UdpReceiver started");
+            log.info("UdpReceiver started");
 
 
         } catch (SocketException e) {
