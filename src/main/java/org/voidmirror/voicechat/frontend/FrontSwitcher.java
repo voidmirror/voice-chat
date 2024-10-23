@@ -1,7 +1,9 @@
 package org.voidmirror.voicechat.frontend;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
+import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,6 +38,15 @@ public class FrontSwitcher {
         return fxHolder.getFxButtons().get(fxId);
     }
 
+    public FrontSwitcher addToggleButtonToHolder(ToggleButton button, String fxId) {
+        fxHolder.getFxToggleButtons().put(fxId, button);
+        return this;
+    }
+
+    public ToggleButton getToggleButtonFromHolder(String fxId) {
+        return fxHolder.getFxToggleButtons().get(fxId);
+    }
+
     public FrontSwitcher addTextFieldToHolder(TextField textField, String fxId) {
         fxHolder.getFxTextFields().put(fxId, textField);
         return this;
@@ -54,17 +65,23 @@ public class FrontSwitcher {
         return fxHolder.getFxImageViews().get(fxId);
     }
 
+    public FrontSwitcher addSliderToHolder(Slider slider, String fxId) {
+        fxHolder.getFxSliders().put(fxId, slider);
+        return this;
+    }
+
+    public Slider getSliderFromHolder(String fxId) {
+        return fxHolder.getFxSliders().get(fxId);
+    }
+
 }
 
+@Getter
 @NoArgsConstructor
 class FxHolder {
-
-    @Getter
-    private HashMap<String, Button> fxButtons = new HashMap<>();
-    @Getter
-    private HashMap<String, TextField> fxTextFields = new HashMap<>();
-    @Getter
-    private HashMap<String, ImageView> fxImageViews = new HashMap<>();
-
-
+    private final HashMap<String, Button> fxButtons = new HashMap<>();
+    private final HashMap<String, ToggleButton> fxToggleButtons = new HashMap<>();
+    private final HashMap<String, TextField> fxTextFields = new HashMap<>();
+    private final HashMap<String, ImageView> fxImageViews = new HashMap<>();
+    private final HashMap<String, Slider> fxSliders = new HashMap<>();
 }

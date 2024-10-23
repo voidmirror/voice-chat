@@ -1,16 +1,24 @@
 package org.voidmirror.voicechat.udp;
 
+import javafx.application.Platform;
+import javafx.scene.control.ToggleButton;
 import lombok.extern.slf4j.Slf4j;
+import org.voidmirror.voicechat.frontend.FrontSwitcher;
+import org.voidmirror.voicechat.misc.ComponentInitializer;
+import org.voidmirror.voicechat.voice.LineHolder;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.Arrays;
 
 @Slf4j
 public class UdpReceiver implements Runnable{
@@ -37,13 +45,31 @@ public class UdpReceiver implements Runnable{
             speakers.open(format);
             speakers.start();
 
+            LineHolder lineHolder = LineHolder.getInstance();
+            lineHolder.addDataLine(speakers, "speakers");
+            lineHolder.addFloatControl((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN), "volumeSpeakers"); // TODO: check / MasterGain
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getPrecision());
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMaximum());
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMinimum());
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMaximum() / ((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMinimum());
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMaxLabel());
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMidLabel());
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMinLabel());
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getUnits());
+            System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getValue());
+
+
+            ComponentInitializer.getInstance().volumeSliderInit();
+
+            FrontSwitcher.getInstance().getSliderFromHolder("volumeSpeakers").setDisable(false);
+            System.out.println("Controls: " + Arrays.toString(speakers.getControls()));
+
             Thread speakerThread = new Thread(() -> {
                 int bufferVarInput = udpInputBuffer.length;
                 try {
-                    while (datagramSocket.isBound()) {  // TODO: isBound() / isConnected() ?
+                    while (true) {
                         datagramSocket.receive(dp);
 
-                        // TODO: uncomment
                         speakers.write(
                                 dp.getData(),
                                 0,
