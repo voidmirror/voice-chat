@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
 
 @Slf4j
@@ -34,6 +35,7 @@ public class UdpReceiver implements Runnable{
 
         try {
             DatagramSocket datagramSocket = new DatagramSocket(port);
+            datagramSocket.setSoTimeout(200);   // TODO: have to check for appropriate value
             final byte[] udpInputBuffer = new byte[1024];
 
             DatagramPacket dp = new DatagramPacket(udpInputBuffer, udpInputBuffer.length);
@@ -68,8 +70,14 @@ public class UdpReceiver implements Runnable{
                 int bufferVarInput = udpInputBuffer.length;
                 try {
                     while (true) {
-                        datagramSocket.receive(dp);
+                        try {
+                            datagramSocket.receive(dp);
+                        } catch (SocketTimeoutException e) {
+                            System.out.println(e.getMessage());
+                            dp.setData(new byte[1024]);
+                        }
 
+                        System.out.println(Arrays.toString(dp.getData()));
                         speakers.write(
                                 dp.getData(),
                                 0,

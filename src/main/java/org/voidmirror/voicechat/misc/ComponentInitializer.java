@@ -48,18 +48,22 @@ public class ComponentInitializer {
         });
     }
 
-    public void microMuteInit() {
-        BooleanControl muteMicroControl = (BooleanControl) LineHolder.getInstance().getDataLine("microphone").getControl(BooleanControl.Type.MUTE);
-        ToggleButton btnMuteMicro = FrontSwitcher.getInstance().getToggleButtonFromHolder("btnMuteMicro");
-        btnMuteMicro.setOnAction(actionEvent -> {
-            if (btnMuteMicro.isSelected()) {
-                muteMicroControl.setValue(true);
-                System.out.println(muteMicroControl.getValue());
-            } else {
-                muteMicroControl.setValue(false);
-                System.out.println(muteMicroControl.getValue());
-            }
-        });
-    }
+//    public void microMuteInit() {
+//        ThreadHolder holder = ThreadHolder.getInstance();
+//        ToggleButton btnMuteMicro = FrontSwitcher.getInstance().getToggleButtonFromHolder("btnMuteMicro");
+//        btnMuteMicro.setOnAction(actionEvent -> {
+//            if (btnMuteMicro.isSelected()) {
+////                System.out.println("selected");
+//                System.out.println(holder.getThread("microphone").getId());
+//                System.out.println(holder.getThread("microphoneCopy").getId());
+//                holder.getThread("microphone").interrupt();
+//                holder.addThread(holder.getThread("microphoneCopy"), "microphone");
+//            } else {
+////                System.out.println("unselected");
+//                System.out.println(holder.getThread("microphone").getId());
+//                holder.getThread("microphone").start();
+//            }
+//        });
+//    }
 
 }

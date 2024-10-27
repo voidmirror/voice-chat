@@ -26,6 +26,9 @@ public class LineHolder {
     @Getter
     @Setter
     private float microMuteVolumeHolder = 0f;
+    @Getter
+    @Setter
+    private Boolean microActiveBooleanHolder = Boolean.TRUE;
 
     public void addFloatControl(FloatControl floatControl, String name) {
         this.voiceHolder.getFloatControlHashMap().put(name, floatControl);

@@ -10,6 +10,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.voidmirror.voicechat.misc.ComponentInitializer;
+import org.voidmirror.voicechat.misc.RuntimeConfig;
 import org.voidmirror.voicechat.model.ConnectionData;
 import org.voidmirror.voicechat.udp.UdpChoreographer;
 import org.voidmirror.voicechat.voice.LineHolder;
@@ -42,6 +43,7 @@ public class MainController {
 
     private FrontSwitcher frontSwitcher;
     private LineHolder lineHolder;
+    private RuntimeConfig runtimeConfig;
 
 
     public void initialize() {
@@ -63,6 +65,9 @@ public class MainController {
         ComponentInitializer.getInstance().setVolumeSlider(slVolume);
 
         lineHolder = LineHolder.getInstance();
+        runtimeConfig = RuntimeConfig.getInstance();
+
+        onMicroMuteInit();
 
     }
 
@@ -72,6 +77,12 @@ public class MainController {
                 ((Node) pressEvent.getSource()).getScene().getWindow().setX(dragEvent.getScreenX() - pressEvent.getSceneX());
                 ((Node) pressEvent.getSource()).getScene().getWindow().setY(dragEvent.getScreenY() - pressEvent.getSceneY());
             });
+        });
+    }
+
+    public void onMicroMuteInit() {
+        btnMuteMicro.setOnAction(actionEvent -> {
+            runtimeConfig.setMicroActive(!btnMuteMicro.isSelected());
         });
     }
 

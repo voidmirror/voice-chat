@@ -3,6 +3,8 @@ package org.voidmirror.voicechat.udp;
 import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
 import org.voidmirror.voicechat.misc.ComponentInitializer;
+import org.voidmirror.voicechat.misc.RuntimeConfig;
+import org.voidmirror.voicechat.misc.ThreadHolder;
 import org.voidmirror.voicechat.voice.LineHolder;
 
 import javax.sound.sampled.AudioFormat;
@@ -51,34 +53,28 @@ public class UdpSender implements Runnable{
             microphone = (TargetDataLine) AudioSystem.getLine(outInfo);
             microphone.open(format);
             microphone.start();
-//            System.out.println("Controls: " + Arrays.toString(microphone.getControls()));
 
             LineHolder lineHolder = LineHolder.getInstance();
             lineHolder.addDataLine(microphone, "microphone");
-//            lineHolder.addFloatControl((FloatControl) microphone.getControl(BooleanControl.Type.MUTE), "muteMicro");
-
-//            FrontSwitcher.getInstance().getToggleButtonFromHolder("btnMuteMicro").setDisable(false);
-
-//            FloatControl booleanControl = (FloatControl) microphone.getControl(FloatControl.Type.MASTER_GAIN);
-
-//            ComponentInitializer.getInstance().microMuteInit();
 
 
-
-            Thread microphoneThread = new Thread(new Runnable() {
+            Thread microphoneThread = new Thread(new Runnable() { // TODO: check -> separate thread to get from method and reload thread every muteMicro event
                 final byte[] outputBuffer = new byte[1024];
 
                 @Override
                 public void run() {
-                    while (true) {
-                        microphone.read(outputBuffer, 0, 1024);
-                        dp.setData(outputBuffer, 0, 1024);
-//                        System.out.println(Arrays.toString(outputBuffer));
-                        try {
-                            datagramSocket.send(dp);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            throw new RuntimeException(e);
+                    RuntimeConfig runtimeConfig = RuntimeConfig.getInstance();
+                    while (Thread.currentThread().isAlive()) {  // TODO: create local variable for current thread if necessary
+                        if (runtimeConfig.isMicroActive()) {
+                            microphone.read(outputBuffer, 0, 1024);
+//                            System.out.println("sending packet " + Arrays.toString(outputBuffer));
+                            dp.setData(outputBuffer, 0, 1024);
+                            try {
+                                datagramSocket.send(dp);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                throw new RuntimeException(e);
+                            }
                         }
                     }
 
@@ -86,6 +82,10 @@ public class UdpSender implements Runnable{
             });
             microphoneThread.setDaemon(true);
             microphoneThread.start();
+
+            ThreadHolder.getInstance().addThread(microphoneThread, "microphone");
+            ThreadHolder.getInstance().addThread(microphoneThread, "microphoneCopy");
+            FrontSwitcher.getInstance().getToggleButtonFromHolder("btnMuteMicro").setDisable(false);
 
             log.info("UdpSender started");
 
