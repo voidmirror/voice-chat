@@ -3,13 +3,23 @@ package org.voidmirror.voicechat.misc;
 import javafx.application.Platform;
 import javafx.scene.control.Slider;
 import javafx.scene.control.ToggleButton;
+import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
 import org.voidmirror.voicechat.voice.LineHolder;
 
 import javax.sound.sampled.BooleanControl;
 import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.SourceDataLine;
+import java.io.IOException;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.SocketTimeoutException;
+import java.util.Arrays;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
+@Slf4j
 public class ComponentInitializer {
 
     private ComponentInitializer() {}
@@ -28,42 +38,32 @@ public class ComponentInitializer {
     @Setter
     private Slider volumeSlider;
 
+    @Getter
+    private final ConcurrentLinkedQueue<byte[]> speakerConcurrentLinkedQueue = new ConcurrentLinkedQueue<>();
+
     /**
      * Slider range 0-200
      */
     public void volumeSliderInit() {
         FloatControl speakersVolumeFloatControl = LineHolder.getInstance().getFloatControl("volumeSpeakers");
+        System.out.println("Init volume value: " + speakersVolumeFloatControl.getValue());
 
         Platform.runLater(() -> {
             volumeSlider.setOnMousePressed(pressEvent -> {
-                volumeSlider.setOnMouseDragged(dragEvent -> {
+                volumeSlider.setOnMouseDragged(releaseEvent -> {
                     float volume = 20f * (float) Math.log10((float) (volumeSlider.getValue() / 100));
-
                     speakersVolumeFloatControl.setValue(
                             volume < -35 ? -80 : volume
                     );
-                    System.out.println(speakersVolumeFloatControl.getValue());
                 });
+            });
+            volumeSlider.setOnMouseClicked(clickEvent -> {
+                float volume = 20f * (float) Math.log10((float) (volumeSlider.getValue() / 100));
+                speakersVolumeFloatControl.setValue(
+                        volume < -35 ? -80 : volume
+                );
             });
         });
     }
-
-//    public void microMuteInit() {
-//        ThreadHolder holder = ThreadHolder.getInstance();
-//        ToggleButton btnMuteMicro = FrontSwitcher.getInstance().getToggleButtonFromHolder("btnMuteMicro");
-//        btnMuteMicro.setOnAction(actionEvent -> {
-//            if (btnMuteMicro.isSelected()) {
-////                System.out.println("selected");
-//                System.out.println(holder.getThread("microphone").getId());
-//                System.out.println(holder.getThread("microphoneCopy").getId());
-//                holder.getThread("microphone").interrupt();
-//                holder.addThread(holder.getThread("microphoneCopy"), "microphone");
-//            } else {
-////                System.out.println("unselected");
-//                System.out.println(holder.getThread("microphone").getId());
-//                holder.getThread("microphone").start();
-//            }
-//        });
-//    }
 
 }

@@ -57,17 +57,15 @@ public class UdpSender implements Runnable{
             LineHolder lineHolder = LineHolder.getInstance();
             lineHolder.addDataLine(microphone, "microphone");
 
-
-            Thread microphoneThread = new Thread(new Runnable() { // TODO: check -> separate thread to get from method and reload thread every muteMicro event
+            Thread microphoneThread = new Thread(new Runnable() {
                 final byte[] outputBuffer = new byte[1024];
 
                 @Override
                 public void run() {
                     RuntimeConfig runtimeConfig = RuntimeConfig.getInstance();
-                    while (Thread.currentThread().isAlive()) {  // TODO: create local variable for current thread if necessary
+                    while (Thread.currentThread().isAlive()) {
                         if (runtimeConfig.isMicroActive()) {
                             microphone.read(outputBuffer, 0, 1024);
-//                            System.out.println("sending packet " + Arrays.toString(outputBuffer));
                             dp.setData(outputBuffer, 0, 1024);
                             try {
                                 datagramSocket.send(dp);
@@ -75,6 +73,8 @@ public class UdpSender implements Runnable{
                                 e.printStackTrace();
                                 throw new RuntimeException(e);
                             }
+                        } else {
+                            microphone.flush();
                         }
                     }
 

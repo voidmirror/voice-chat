@@ -25,4 +25,14 @@ public class ThreadHolder {
         return threadHashMap.get(name);
     }
 
+    public void startDaemon(String threadName) {
+        Thread thread = threadHashMap.get(threadName);
+        thread.setDaemon(true);
+        thread.start();
+    }
+
+    public void killThread(String name) {
+        threadHashMap.get(name).interrupt();
+    }
+
 }
