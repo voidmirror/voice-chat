@@ -1,10 +1,17 @@
 package org.voidmirror.voicechat.udp;
 
 import lombok.extern.slf4j.Slf4j;
+import org.voidmirror.voicechat.frontend.FrontSwitcher;
+import org.voidmirror.voicechat.misc.ComponentInitializer;
+import org.voidmirror.voicechat.misc.RuntimeConfig;
+import org.voidmirror.voicechat.misc.ThreadHolder;
+import org.voidmirror.voicechat.voice.LineHolder;
 
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.BooleanControl;
 import javax.sound.sampled.DataLine;
+import javax.sound.sampled.FloatControl;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.TargetDataLine;
 import java.io.IOException;
@@ -13,6 +20,7 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.util.Arrays;
 
 @Slf4j
 public class UdpSender implements Runnable{
@@ -46,19 +54,27 @@ public class UdpSender implements Runnable{
             microphone.open(format);
             microphone.start();
 
+            LineHolder lineHolder = LineHolder.getInstance();
+            lineHolder.addDataLine(microphone, "microphone");
+
             Thread microphoneThread = new Thread(new Runnable() {
                 final byte[] outputBuffer = new byte[1024];
 
                 @Override
                 public void run() {
-                    while (datagramSocket.isBound()) {  // TODO: isBound() / isConnected() ?
-                        microphone.read(outputBuffer, 0, 1024);
-                        dp.setData(outputBuffer, 0, 1024);
-                        try {
-                            datagramSocket.send(dp);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                            throw new RuntimeException(e);
+                    RuntimeConfig runtimeConfig = RuntimeConfig.getInstance();
+                    while (Thread.currentThread().isAlive()) {
+                        if (runtimeConfig.isMicroActive()) {
+                            microphone.read(outputBuffer, 0, 1024);
+                            dp.setData(outputBuffer, 0, 1024);
+                            try {
+                                datagramSocket.send(dp);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                                throw new RuntimeException(e);
+                            }
+                        } else {
+                            microphone.flush();
                         }
                     }
 
@@ -66,6 +82,10 @@ public class UdpSender implements Runnable{
             });
             microphoneThread.setDaemon(true);
             microphoneThread.start();
+
+            ThreadHolder.getInstance().addThread(microphoneThread, "microphone");
+            ThreadHolder.getInstance().addThread(microphoneThread, "microphoneCopy");
+            FrontSwitcher.getInstance().getToggleButtonFromHolder("btnMuteMicro").setDisable(false);
 
             log.info("UdpSender started");
 
