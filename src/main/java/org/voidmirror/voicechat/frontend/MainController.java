@@ -3,6 +3,7 @@ package org.voidmirror.voicechat.frontend;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -40,6 +41,8 @@ public class MainController {
     private ImageView ivServerConnectionStatus;
     @FXML
     private Slider slVolume;
+    @FXML
+    private Label lblPing;
 
     private FrontSwitcher frontSwitcher;
     private LineHolder lineHolder;
@@ -59,6 +62,8 @@ public class MainController {
                 .addToggleButtonToHolder(btnMuteMicro, btnMuteMicro.getId())
 
                 .addSliderToHolder(slVolume, "volumeSpeakers")
+
+                .addLabelToHolder(lblPing, "lblPing")
 
                 .addImageViewToHolder(ivServerConnectionStatus, ivServerConnectionStatus.getId());
 

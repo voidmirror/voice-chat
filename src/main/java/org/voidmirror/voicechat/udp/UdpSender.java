@@ -2,6 +2,7 @@ package org.voidmirror.voicechat.udp;
 
 import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
+import org.voidmirror.voicechat.misc.ByteUtils;
 import org.voidmirror.voicechat.misc.ComponentInitializer;
 import org.voidmirror.voicechat.misc.RuntimeConfig;
 import org.voidmirror.voicechat.misc.ThreadHolder;
@@ -58,15 +59,17 @@ public class UdpSender implements Runnable{
             lineHolder.addDataLine(microphone, "microphone");
 
             Thread microphoneThread = new Thread(new Runnable() {
-                final byte[] outputBuffer = new byte[1024];
+                final byte[] outputBuffer = new byte[Long.BYTES + 1024];
 
                 @Override
                 public void run() {
                     RuntimeConfig runtimeConfig = RuntimeConfig.getInstance();
                     while (Thread.currentThread().isAlive()) {
                         if (runtimeConfig.isMicroActive()) {
-                            microphone.read(outputBuffer, 0, 1024);
-                            dp.setData(outputBuffer, 0, 1024);
+                            microphone.read(outputBuffer, Long.BYTES, 1024);
+                            byte[] time = ByteUtils.longToBytes(System.currentTimeMillis());
+                            System.arraycopy(time, 0, outputBuffer, 0, 8);
+                            dp.setData(outputBuffer, 0, outputBuffer.length); // offset of time length
                             try {
                                 datagramSocket.send(dp);
                             } catch (IOException e) {

@@ -1,6 +1,7 @@
 package org.voidmirror.voicechat.frontend;
 
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
@@ -74,6 +75,15 @@ public class FrontSwitcher {
         return fxHolder.getFxSliders().get(fxId);
     }
 
+    public FrontSwitcher addLabelToHolder(Label label, String fxId) {
+        fxHolder.getFxLabels().put(fxId, label);
+        return this;
+    }
+
+    public Label getLabelFromHolder(String fxId) {
+        return fxHolder.getFxLabels().get(fxId);
+    }
+
 }
 
 @Getter
@@ -84,4 +94,5 @@ class FxHolder {
     private final HashMap<String, TextField> fxTextFields = new HashMap<>();
     private final HashMap<String, ImageView> fxImageViews = new HashMap<>();
     private final HashMap<String, Slider> fxSliders = new HashMap<>();
+    private final HashMap<String, Label> fxLabels = new HashMap<>();
 }

@@ -1,9 +1,11 @@
 package org.voidmirror.voicechat.udp;
 
 import javafx.application.Platform;
+import javafx.scene.control.Label;
 import javafx.scene.control.ToggleButton;
 import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
+import org.voidmirror.voicechat.misc.ByteUtils;
 import org.voidmirror.voicechat.misc.ComponentInitializer;
 import org.voidmirror.voicechat.voice.LineHolder;
 
@@ -32,13 +34,19 @@ public class UdpReceiver implements Runnable{
     private final int port;
     private SourceDataLine speakers;
 
+    private final int PING_PACKETS_NUMBER = 10;
+    private int pingCounter = 0;
+    private final long[] pings = new long[PING_PACKETS_NUMBER];
+
+    private final Label lblPing = FrontSwitcher.getInstance().getLabelFromHolder("lblPing");
+
     @Override
     public void run() {
 
         try {
             DatagramSocket datagramSocket = new DatagramSocket(port);
             datagramSocket.setSoTimeout(200);
-            final byte[] udpInputBuffer = new byte[1024];
+            final byte[] udpInputBuffer = new byte[Long.BYTES + 1024];
 
             DatagramPacket dp = new DatagramPacket(udpInputBuffer, udpInputBuffer.length);
 
@@ -68,7 +76,6 @@ public class UdpReceiver implements Runnable{
             System.out.println("Controls: " + Arrays.toString(speakers.getControls()));
 
             Thread speakerThread = new Thread(() -> {
-                int bufferVarInput = udpInputBuffer.length;
                 byte[] toWrite;
                 try {
                     while (Thread.currentThread().isAlive()) {
@@ -79,13 +86,13 @@ public class UdpReceiver implements Runnable{
                             toWrite = null;
                             speakers.flush();
                         }
-
                         if (toWrite != null) {
                             speakers.write(
                                     toWrite,
-                                    0,
-                                    bufferVarInput
+                                    Long.BYTES,
+                                    1024
                             );
+                            updatePing(ByteUtils.bytesToLong(toWrite));
                         }
                     }
                 } catch (IOException e) {
@@ -105,6 +112,24 @@ public class UdpReceiver implements Runnable{
         } catch (LineUnavailableException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
+        }
+
+    }
+
+    private void updatePing(long ping) {
+        if (pingCounter == PING_PACKETS_NUMBER) {
+            long sum = Arrays.stream(pings).sum();
+            System.out.println(sum / PING_PACKETS_NUMBER + "ms");
+            Platform.runLater(() -> {
+                lblPing.setText(
+                        sum / PING_PACKETS_NUMBER + "ms"
+                );
+            });
+
+            pingCounter = 0;
+        } else {
+            pings[pingCounter] = System.currentTimeMillis() - ping;
+            pingCounter++;
         }
 
     }
