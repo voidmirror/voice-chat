@@ -39,7 +39,7 @@ public class ComponentInitializer {
     private Slider volumeSlider;
 
     @Getter
-    private final ConcurrentLinkedQueue<byte[]> speakerConcurrentLinkedQueue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<Long> pingQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * Slider range 0-200

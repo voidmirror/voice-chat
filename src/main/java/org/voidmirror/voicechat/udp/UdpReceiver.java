@@ -24,6 +24,8 @@ import java.net.SocketTimeoutException;
 import java.util.Arrays;
 import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
 @Slf4j
 public class UdpReceiver implements Runnable{
@@ -33,10 +35,6 @@ public class UdpReceiver implements Runnable{
 
     private final int port;
     private SourceDataLine speakers;
-
-    private final int PING_PACKETS_NUMBER = 10;
-    private int pingCounter = 0;
-    private final long[] pings = new long[PING_PACKETS_NUMBER];
 
     private final Label lblPing = FrontSwitcher.getInstance().getLabelFromHolder("lblPing");
 
@@ -76,6 +74,7 @@ public class UdpReceiver implements Runnable{
             System.out.println("Controls: " + Arrays.toString(speakers.getControls()));
 
             Thread speakerThread = new Thread(() -> {
+                ConcurrentLinkedQueue<Long> pingQueue = ComponentInitializer.getInstance().getPingQueue();
                 byte[] toWrite;
                 try {
                     while (Thread.currentThread().isAlive()) {
@@ -87,12 +86,15 @@ public class UdpReceiver implements Runnable{
                             speakers.flush();
                         }
                         if (toWrite != null) {
-                            speakers.write(
-                                    toWrite,
-                                    Long.BYTES,
-                                    1024
-                            );
-                            updatePing(ByteUtils.bytesToLong(toWrite));
+                            long time = System.currentTimeMillis() - ByteUtils.bytesToLong(toWrite);
+                            if (time < 400) {
+                                speakers.write(
+                                        toWrite,
+                                        Long.BYTES,
+                                        1024
+                                );
+                            }
+                            pingQueue.add(time);
                         }
                     }
                 } catch (IOException e) {
@@ -100,8 +102,23 @@ public class UdpReceiver implements Runnable{
                 }
             });
 
+            Thread pingThread = new Thread(() -> {
+                ConcurrentLinkedQueue<Long> pingQueue = ComponentInitializer.getInstance().getPingQueue();
+                while (Thread.currentThread().isAlive()) {
+                    if (pingQueue.size() > 50) {
+                        long[] ls = pingQueue.stream().mapToLong(Long::longValue).toArray();
+                        pingQueue.clear();
+                        Platform.runLater(() -> lblPing.setText(
+                                 Arrays.stream(ls).sum() / Arrays.stream(ls).count() + "ms"
+                        ));
+                    }
+                }
+            });
+
             speakerThread.setDaemon(true);
             speakerThread.start();
+            pingThread.setDaemon(true);
+            pingThread.start();
 
             log.info("UdpReceiver started");
 
@@ -112,24 +129,6 @@ public class UdpReceiver implements Runnable{
         } catch (LineUnavailableException e) {
             e.printStackTrace();
             throw new RuntimeException(e);
-        }
-
-    }
-
-    private void updatePing(long ping) {
-        if (pingCounter == PING_PACKETS_NUMBER) {
-            long sum = Arrays.stream(pings).sum();
-            System.out.println(sum / PING_PACKETS_NUMBER + "ms");
-            Platform.runLater(() -> {
-                lblPing.setText(
-                        sum / PING_PACKETS_NUMBER + "ms"
-                );
-            });
-
-            pingCounter = 0;
-        } else {
-            pings[pingCounter] = System.currentTimeMillis() - ping;
-            pingCounter++;
         }
 
     }

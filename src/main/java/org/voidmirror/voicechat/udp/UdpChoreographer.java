@@ -5,6 +5,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
+import org.voidmirror.voicechat.misc.ByteUtils;
 import org.voidmirror.voicechat.model.ConnectionData;
 import org.voidmirror.voicechat.model.ConnectionState;
 
@@ -72,12 +73,12 @@ public class UdpChoreographer {
     }
 
     public void startUdpClient(ConnectionData connectionData) {
-        ConnectionState state = new ConnectionState();
         try {
 
             DatagramSocket datagramSocketFirstSend = new DatagramSocket();
 
-            final byte[] udpOutputBuffer = "client hello".getBytes();
+            final byte[] udpOutputBuffer = ByteUtils.longToBytes(System.currentTimeMillis());
+            System.out.println(udpOutputBuffer.length);
 
             DatagramPacket dpSend = new DatagramPacket(
                     udpOutputBuffer, udpOutputBuffer.length,
