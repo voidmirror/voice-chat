@@ -2,7 +2,6 @@ package org.voidmirror.voicechat.udp;
 
 import javafx.application.Platform;
 import javafx.scene.control.Label;
-import javafx.scene.control.ToggleButton;
 import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
 import org.voidmirror.voicechat.misc.ByteUtils;
@@ -13,7 +12,6 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.FloatControl;
-import javax.sound.sampled.Line;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import java.io.IOException;
@@ -22,10 +20,8 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.util.Arrays;
-import java.util.Timer;
 import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.stream.Collectors;
-import java.util.stream.LongStream;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Slf4j
 public class UdpReceiver implements Runnable{
@@ -106,10 +102,15 @@ public class UdpReceiver implements Runnable{
                 ConcurrentLinkedQueue<Long> pingQueue = ComponentInitializer.getInstance().getPingQueue();
                 while (Thread.currentThread().isAlive()) {
                     if (pingQueue.size() > 50) {
-                        long[] ls = pingQueue.stream().mapToLong(Long::longValue).toArray();
+                        AtomicLong sum = new AtomicLong();
+                        AtomicLong count = new AtomicLong();
+                        pingQueue.forEach(ping -> {
+                            sum.addAndGet(ping);
+                            count.addAndGet(1);
+                        });
                         pingQueue.clear();
                         Platform.runLater(() -> lblPing.setText(
-                                 Arrays.stream(ls).sum() / Arrays.stream(ls).count() + "ms"
+                                 sum.get() / count.get() + "ms"
                         ));
                     }
                 }
