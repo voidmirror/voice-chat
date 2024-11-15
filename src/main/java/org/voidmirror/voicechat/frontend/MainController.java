@@ -1,5 +1,7 @@
 package org.voidmirror.voicechat.frontend;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -10,13 +12,21 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import org.voidmirror.voicechat.events.BaseEvent;
+import org.voidmirror.voicechat.events.EventHandler;
+import org.voidmirror.voicechat.events.EventService;
+import org.voidmirror.voicechat.events.EventType;
 import org.voidmirror.voicechat.misc.ComponentInitializer;
 import org.voidmirror.voicechat.misc.RuntimeConfig;
+import org.voidmirror.voicechat.model.ChatMessage;
 import org.voidmirror.voicechat.model.ConnectionData;
+import org.voidmirror.voicechat.service.ContactService;
+import org.voidmirror.voicechat.service.MessageService;
 import org.voidmirror.voicechat.udp.UdpChoreographer;
 import org.voidmirror.voicechat.voice.LineHolder;
 
 import javax.sound.sampled.FloatControl;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 
 public class MainController {
@@ -47,10 +57,12 @@ public class MainController {
     private FrontSwitcher frontSwitcher;
     private LineHolder lineHolder;
     private RuntimeConfig runtimeConfig;
-
+    private ContactService contactService;
 
     public void initialize() {
         onMouseDragEntered();
+        setUpEventHandler();
+        EventService.getInstance().enableEventReceiver();
 
         frontSwitcher = FrontSwitcher.getInstance();
         frontSwitcher
@@ -71,9 +83,24 @@ public class MainController {
 
         lineHolder = LineHolder.getInstance();
         runtimeConfig = RuntimeConfig.getInstance();
+        contactService = ContactService.getInstance();
 
         onMicroMuteInit();
 
+    }
+
+    public void setUpEventHandler() {
+        Thread thread = new Thread(() -> {
+            ConcurrentLinkedQueue<BaseEvent> eventQueue = ComponentInitializer.getInstance().getEventQueue();
+            EventHandler eventHandler = EventHandler.getInstance();
+            while (Thread.currentThread().isAlive()) {
+                if (!eventQueue.isEmpty()) {
+                    eventHandler.handle(eventQueue.poll());
+                }
+            }
+        });
+        thread.setDaemon(true);
+        thread.start();
     }
 
     public void onMouseDragEntered() {
@@ -133,6 +160,7 @@ public class MainController {
 
         btnConnect.setDisable(true);
         tfHost.setDisable(true);
+        contactService.addContact("current", host);
 
         UdpChoreographer udpChoreographer = new UdpChoreographer();
         ConnectionData connectionData = new ConnectionData();
