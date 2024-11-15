@@ -6,6 +6,7 @@ import javafx.scene.control.ToggleButton;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.voidmirror.voicechat.events.BaseEvent;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
 import org.voidmirror.voicechat.voice.LineHolder;
 
@@ -40,6 +41,8 @@ public class ComponentInitializer {
 
     @Getter
     private final ConcurrentLinkedQueue<Long> pingQueue = new ConcurrentLinkedQueue<>();
+    @Getter
+    private final ConcurrentLinkedQueue<BaseEvent> eventQueue = new ConcurrentLinkedQueue<>();
 
     /**
      * Slider range 0-200
