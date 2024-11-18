@@ -28,6 +28,9 @@ public class FrontSwitcher {
         return self;
     }
 
+    @Getter
+    private static boolean isServer = false;
+
     private FxHolder fxHolder = new FxHolder();
 
     public FrontSwitcher addButtonToHolder(Button button, String fxId) {

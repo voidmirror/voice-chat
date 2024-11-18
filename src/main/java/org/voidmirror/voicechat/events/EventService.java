@@ -2,8 +2,10 @@ package org.voidmirror.voicechat.events;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.voidmirror.voicechat.misc.RuntimeConfig;
 import org.voidmirror.voicechat.model.ChatMessage;
 import org.voidmirror.voicechat.misc.ComponentInitializer;
+import org.voidmirror.voicechat.service.ContactService;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -14,6 +16,9 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+/**
+ * Have to be initialized on program start
+ */
 @Slf4j
 public class EventService {
 
@@ -51,6 +56,7 @@ public class EventService {
             try (ServerSocket eventSocket = new ServerSocket(port)) {
                 while (Thread.currentThread().isAlive()) {
                     Socket socket = eventSocket.accept();
+                    ContactService.getInstance().addContact("current", socket.getInetAddress().getHostAddress());
                     try (
                         BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()))
                     ) {

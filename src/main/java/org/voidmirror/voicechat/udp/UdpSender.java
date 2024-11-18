@@ -26,7 +26,7 @@ import java.util.Arrays;
 @Slf4j
 public class UdpSender implements Runnable{
 
-    public UdpSender(int port, String host) {
+    public UdpSender(String host, int port) {
         this.port = port;
         try {
             this.host = InetAddress.getByName(host);
@@ -73,8 +73,7 @@ public class UdpSender implements Runnable{
                             try {
                                 datagramSocket.send(dp);
                             } catch (IOException e) {
-                                e.printStackTrace();
-                                throw new RuntimeException(e);
+                                log.error("UdpSender datagramSocket send exception: {}", e.getMessage());
                             }
                         } else {
                             microphone.flush();
@@ -94,11 +93,9 @@ public class UdpSender implements Runnable{
 
 
         } catch (SocketException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            log.error("UdpSender socket exception: {}", e.getMessage());
         } catch (LineUnavailableException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            log.error("UdpSender DataLine is unavailable: {}", e.getMessage());
         }
     }
 }

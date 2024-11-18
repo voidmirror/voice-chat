@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.frontend.FrontSwitcher;
 import org.voidmirror.voicechat.misc.ByteUtils;
 import org.voidmirror.voicechat.misc.ComponentInitializer;
+import org.voidmirror.voicechat.service.ClockService;
 import org.voidmirror.voicechat.voice.LineHolder;
 
 import javax.sound.sampled.AudioFormat;
@@ -19,6 +20,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.time.Clock;
 import java.util.Arrays;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicLong;
@@ -54,6 +56,7 @@ public class UdpReceiver implements Runnable{
             LineHolder lineHolder = LineHolder.getInstance();
             lineHolder.addDataLine(speakers, "speakers");
             lineHolder.addFloatControl((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN), "volumeSpeakers");
+            
             System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getPrecision());
             System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMaximum());
             System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMinimum());
@@ -71,6 +74,7 @@ public class UdpReceiver implements Runnable{
 
             Thread speakerThread = new Thread(() -> {
                 ConcurrentLinkedQueue<Long> pingQueue = ComponentInitializer.getInstance().getPingQueue();
+                Clock clock = ClockService.getInstance().getClock();
                 byte[] toWrite;
                 try {
                     while (Thread.currentThread().isAlive()) {
@@ -82,7 +86,7 @@ public class UdpReceiver implements Runnable{
                             speakers.flush();
                         }
                         if (toWrite != null) {
-                            long time = System.currentTimeMillis() - ByteUtils.bytesToLong(toWrite);
+                            long time = Math.abs(clock.millis() - ByteUtils.bytesToLong(toWrite));
                             if (time < 400) {
                                 speakers.write(
                                         toWrite,
@@ -94,7 +98,7 @@ public class UdpReceiver implements Runnable{
                         }
                     }
                 } catch (IOException e) {
-                    log.error("### IO read exception");
+                    log.error("Receiver DataLine writer thread exception: {}", e.getMessage());
                 }
             });
 
@@ -125,11 +129,9 @@ public class UdpReceiver implements Runnable{
 
 
         } catch (SocketException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            log.error("UdpReceiver socket exception: {}", e.getMessage());
         } catch (LineUnavailableException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
+            log.error("UdpReceiver DataLine is unavailable: {}", e.getMessage());
         }
 
     }

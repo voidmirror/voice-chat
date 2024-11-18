@@ -14,11 +14,12 @@ import java.util.regex.Pattern;
 @ToString
 public class ConnectionData {
 
+    /**
+     * Set only through setRemoteHost()
+     */
     private String remoteHost;
     @Setter
-    private int remotePort;
-    @Setter
-    private int localPort;
+    private int voicePort;
 
     /**
      * Check remote host pattern
