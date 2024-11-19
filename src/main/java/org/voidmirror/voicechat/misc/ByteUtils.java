@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 public class ByteUtils {
-    private static ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
+    private static final ByteBuffer byteBuffer = ByteBuffer.allocate(Long.BYTES);
     public static byte[] longToBytes(long l) {
         byteBuffer.putLong(l);
         byte[] bytes = byteBuffer.array();

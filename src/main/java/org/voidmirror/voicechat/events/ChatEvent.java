@@ -9,8 +9,9 @@ import org.voidmirror.voicechat.model.ChatMessage;
 public class ChatEvent extends BaseEvent {
 
     public void setChatMessage(ChatMessage chatMessage) {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            this.setPayload(getObjectMapper().writeValueAsString(chatMessage));
+            this.setPayload(objectMapper.writeValueAsString(chatMessage));
         } catch (JsonProcessingException e) {
             log.error("ChatMessage send mapper error: {}", e.getMessage());
         }

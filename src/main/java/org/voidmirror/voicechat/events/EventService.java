@@ -34,7 +34,7 @@ public class EventService {
     }
 
     private final int port = 9035;
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public void sendEvent(BaseEvent event, String host) {
         try {

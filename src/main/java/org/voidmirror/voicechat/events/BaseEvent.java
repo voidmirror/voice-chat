@@ -10,8 +10,6 @@ import lombok.ToString;
 @ToString
 public class BaseEvent {
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
     private EventType type = null;
     private String payload = null;
 
