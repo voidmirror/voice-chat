@@ -22,17 +22,9 @@ public class ByteUtils {
         byteBuffer.clear();
         return bytes;
     }
+
+    // Works ~6 times longer than vice-versa
     public static long bytesToLong(byte[] bytes) {
-        try {
-            byteBuffer.put(bytes, 0, Long.BYTES); // get first 'long' bytes
-            byteBuffer.flip();
-            long res = byteBuffer.getLong();
-            byteBuffer.clear();
-            return res;
-        } catch (Exception e) {
-            System.out.println(Arrays.toString(bytes));
-            byteBuffer.clear();
-        }
-        return System.currentTimeMillis();
+        return ByteBuffer.wrap(bytes).getLong(); // works faster than explicit algorithm during on 2000000000 operations
     }
 }
