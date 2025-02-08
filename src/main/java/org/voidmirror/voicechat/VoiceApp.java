@@ -6,6 +6,9 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
+import org.voidmirror.voicechat.frontend.FrontSwitcher;
+import org.voidmirror.voicechat.frontend.StageCreator;
+import org.voidmirror.voicechat.frontend.StageParams;
 
 public class VoiceApp extends Application {
     public static void main(String[] args) {
@@ -21,6 +24,9 @@ public class VoiceApp extends Application {
         primaryStage.setResizable(false);
         primaryStage.initStyle(StageStyle.UNDECORATED);
         primaryStage.setScene(new Scene(root));
+
+        FrontSwitcher.getInstance().getStageHolder().put("main", new StageParams(primaryStage, 0, 0));
+
         primaryStage.show();
 
     }

@@ -91,6 +91,10 @@ public class FrontSwitcher {
         return fxHolder.getFxLabels().get(fxId);
     }
 
+    public HashMap<String, StageParams> getStageHolder() {
+        return fxHolder.getStageHolder();
+    }
+
 }
 
 @Getter
@@ -102,4 +106,5 @@ class FxHolder {
     private final HashMap<String, ImageView> fxImageViews = new HashMap<>();
     private final HashMap<String, Slider> fxSliders = new HashMap<>();
     private final HashMap<String, Label> fxLabels = new HashMap<>();
+    private final HashMap<String, StageParams> stageHolder = new HashMap<>();
 }

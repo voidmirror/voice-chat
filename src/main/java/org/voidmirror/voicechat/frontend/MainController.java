@@ -63,10 +63,11 @@ public class MainController {
     private ContactService contactService;
 
     private boolean isContactsListShown = false;
-    private HashMap<String, StageParams> stageHolder = new HashMap<>();
+//    private HashMap<String, StageParams> stageHolder = new HashMap<>();
 
     public void initialize() {
-        onDragMainWindow();
+//        onDragMainWindow();
+        defaultDragMainWindow();
         setUpEventHandler();
         EventService.getInstance().enableEventReceiver();
 
@@ -112,34 +113,39 @@ public class MainController {
             openContactsList();
         } else {
             closeContactsList();
+            FrontSwitcher.getInstance().getStageHolder().remove("contactsList");
         }
         isContactsListShown = !isContactsListShown;
     }
 
-    public void onDragMainWindow() {
-        backgroundPane.setOnMousePressed(pressEvent -> {
-            backgroundPane.setOnMouseDragged(dragEvent -> {
-                double x = dragEvent.getScreenX() - pressEvent.getSceneX();
-                double y = dragEvent.getScreenY() - pressEvent.getSceneY();
-                ((Node) pressEvent.getSource()).getScene().getWindow().setX(x);
-                ((Node) pressEvent.getSource()).getScene().getWindow().setY(y);
-                for (Map.Entry<String, StageParams> stageEntry : stageHolder.entrySet()) {
-                    StageParams stageParams = stageEntry.getValue();
-                    stageParams.getStage().setX(x + stageParams.getXShift());
-                    stageParams.getStage().setY(y + stageParams.getYShift());
-                }
-            });
-        });
+//    public void onDragMainWindow() {
+//        backgroundPane.setOnMousePressed(pressEvent -> {
+//            backgroundPane.setOnMouseDragged(dragEvent -> {
+//                double x = dragEvent.getScreenX() - pressEvent.getSceneX();
+//                double y = dragEvent.getScreenY() - pressEvent.getSceneY();
+//                ((Node) pressEvent.getSource()).getScene().getWindow().setX(x);
+//                ((Node) pressEvent.getSource()).getScene().getWindow().setY(y);
+//                for (Map.Entry<String, StageParams> stageEntry : FrontSwitcher.getInstance().getStageHolder().entrySet()) {
+//                    StageParams stageParams = stageEntry.getValue();
+//                    stageParams.getStage().setX(x + stageParams.getXShift());
+//                    stageParams.getStage().setY(y + stageParams.getYShift());
+//                }
+//            });
+//        });
+//    }
+
+    public void defaultDragMainWindow() {
+        StageCreator.makeStageMovable(backgroundPane, "main");
     }
 
-    public void onDragContactsListWindow() {
-        backgroundPane.setOnMousePressed(pressEvent -> {
-            backgroundPane.setOnMouseDragged(dragEvent -> {
-                ((Node) pressEvent.getSource()).getScene().getWindow().setX(dragEvent.getScreenX() - pressEvent.getSceneX());
-                ((Node) pressEvent.getSource()).getScene().getWindow().setY(dragEvent.getScreenY() - pressEvent.getSceneY());
-            });
-        });
-    }
+//    public void onDragContactsListWindow() {
+//        backgroundPane.setOnMousePressed(pressEvent -> {
+//            backgroundPane.setOnMouseDragged(dragEvent -> {
+//                ((Node) pressEvent.getSource()).getScene().getWindow().setX(dragEvent.getScreenX() - pressEvent.getSceneX());
+//                ((Node) pressEvent.getSource()).getScene().getWindow().setY(dragEvent.getScreenY() - pressEvent.getSceneY());
+//            });
+//        });
+//    }
 
     public void onMicroMuteInit() {
         btnMuteMicro.setOnAction(actionEvent -> {
@@ -159,7 +165,7 @@ public class MainController {
                     btnContacts.getScene().getWindow().getY(),
                     "Contacts"
             );
-            stageHolder.put("contactsList", new StageParams(contactsListStage, backgroundPane.getWidth(), 0));
+            FrontSwitcher.getInstance().getStageHolder().put("contactsList", new StageParams(contactsListStage, backgroundPane.getWidth(), 0));
             contactsListStage.show();
         } catch (IOException e) {
             log.error("Loading ContactsList FXML error: {}", e.getMessage());
@@ -168,7 +174,7 @@ public class MainController {
     }
 
     public void closeContactsList() {
-        stageHolder.get("contactsList").getStage().close();
+        FrontSwitcher.getInstance().getStageHolder().get("contactsList").getStage().close();
     }
 
     public void onDisconnectClient() {

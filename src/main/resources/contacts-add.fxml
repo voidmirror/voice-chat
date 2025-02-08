@@ -3,7 +3,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<AnchorPane prefHeight="80.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.voidmirror.voicechat.frontend.ContactAddController">
+<AnchorPane fx:id="backgroundPane" prefHeight="80.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.voidmirror.voicechat.frontend.ContactAddController">
    <children>
       <TextField alignment="CENTER" layoutX="27.0" layoutY="13.0" promptText="Contact ip" />
       <Button fx:id="btnAddContact" onAction="#addContact" layoutX="74.0" layoutY="46.0" mnemonicParsing="false" text="Button" />
