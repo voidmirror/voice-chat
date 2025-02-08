@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="contactsListPane" prefHeight="250.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.voidmirror.voicechat.frontend.ContactsListController">
+   <children>
+      <ListView layoutX="10.0" layoutY="10.0" prefHeight="180.0" prefWidth="180.0" />
+      <Button layoutX="46.0" layoutY="204.0" mnemonicParsing="false" text="Add" />
+      <Button layoutX="116.0" layoutY="204.0" mnemonicParsing="false" text="Edit" />
+   </children>
+</AnchorPane>

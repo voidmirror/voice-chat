@@ -1,10 +1,10 @@
 package org.voidmirror.voicechat.frontend;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ser.Serializers;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
@@ -13,38 +13,39 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
+import lombok.extern.slf4j.Slf4j;
 import org.voidmirror.voicechat.events.BaseEvent;
 import org.voidmirror.voicechat.events.EventHandler;
 import org.voidmirror.voicechat.events.EventService;
 import org.voidmirror.voicechat.events.EventType;
 import org.voidmirror.voicechat.misc.ComponentInitializer;
 import org.voidmirror.voicechat.misc.RuntimeConfig;
-import org.voidmirror.voicechat.model.ChatMessage;
-import org.voidmirror.voicechat.model.ConnectionData;
 import org.voidmirror.voicechat.service.ClockService;
 import org.voidmirror.voicechat.service.ContactService;
-import org.voidmirror.voicechat.service.MessageService;
-import org.voidmirror.voicechat.udp.UdpChoreographer;
 import org.voidmirror.voicechat.voice.LineHolder;
 
-import javax.sound.sampled.FloatControl;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.regex.Pattern;
 
+@Slf4j
 public class MainController {
 
     @FXML
     private AnchorPane backgroundPane;
     @FXML
+    private AnchorPane contactsListPane;
+    @FXML
     private Button btnConnect;
     @FXML
     private Button btnDisconnect;
-//    @FXML
-//    private Button btnStartServer;
-//    @FXML
-//    private Button btnDisconnectServer;
     @FXML
     private Button btnMinimize;
+    @FXML
+    private ToggleButton btnContacts;
     @FXML
     private ToggleButton btnMuteMicro;
     @FXML
@@ -61,16 +62,17 @@ public class MainController {
     private RuntimeConfig runtimeConfig;
     private ContactService contactService;
 
+    private boolean isContactsListShown = false;
+    private HashMap<String, StageParams> stageHolder = new HashMap<>();
+
     public void initialize() {
-        onMouseDragEntered();
+        onDragMainWindow();
         setUpEventHandler();
         EventService.getInstance().enableEventReceiver();
 
         frontSwitcher = FrontSwitcher.getInstance();
         frontSwitcher
                 .addButtonToHolder(btnConnect, btnConnect.getId())
-//                .addButtonToHolder(btnStartServer, btnStartServer.getId())
-//                .addButtonToHolder(btnDisconnectServer, btnDisconnectServer.getId())
                 .addButtonToHolder(btnDisconnect, btnDisconnect.getId())
 
                 .addToggleButtonToHolder(btnMuteMicro, btnMuteMicro.getId())
@@ -105,7 +107,32 @@ public class MainController {
         thread.start();
     }
 
-    public void onMouseDragEntered() {
+    public void onContactsListButtonToggle() {
+        if (!isContactsListShown) {
+            openContactsList();
+        } else {
+            closeContactsList();
+        }
+        isContactsListShown = !isContactsListShown;
+    }
+
+    public void onDragMainWindow() {
+        backgroundPane.setOnMousePressed(pressEvent -> {
+            backgroundPane.setOnMouseDragged(dragEvent -> {
+                double x = dragEvent.getScreenX() - pressEvent.getSceneX();
+                double y = dragEvent.getScreenY() - pressEvent.getSceneY();
+                ((Node) pressEvent.getSource()).getScene().getWindow().setX(x);
+                ((Node) pressEvent.getSource()).getScene().getWindow().setY(y);
+                for (Map.Entry<String, StageParams> stageEntry : stageHolder.entrySet()) {
+                    StageParams stageParams = stageEntry.getValue();
+                    stageParams.getStage().setX(x + stageParams.getXShift());
+                    stageParams.getStage().setY(y + stageParams.getYShift());
+                }
+            });
+        });
+    }
+
+    public void onDragContactsListWindow() {
         backgroundPane.setOnMousePressed(pressEvent -> {
             backgroundPane.setOnMouseDragged(dragEvent -> {
                 ((Node) pressEvent.getSource()).getScene().getWindow().setX(dragEvent.getScreenX() - pressEvent.getSceneX());
@@ -124,30 +151,32 @@ public class MainController {
         ((Stage) btnMinimize.getScene().getWindow()).setIconified(true);
     }
 
-//    public void onConnect() {
-//        connect();
-//    }
+    public void openContactsList() {
+        Stage contactsListStage = new Stage();
+        contactsListStage.setTitle("Contacts");
+        contactsListStage.setResizable(false);
+        contactsListStage.initStyle(StageStyle.UNDECORATED);
+        contactsListStage.setX(btnContacts.getScene().getWindow().getX() + backgroundPane.getWidth());
+        contactsListStage.setY(btnContacts.getScene().getWindow().getY());
+        try {
+            Parent root = FXMLLoader.load(getClass().getResource("/contacts-list.fxml"));
+            Scene scene = new Scene(root);
+            contactsListStage.setScene(scene);
+            stageHolder.put("contactsList", new StageParams(contactsListStage, backgroundPane.getWidth(), 0));
+            contactsListStage.show();
+        } catch (IOException e) {
+            log.error("Loading ContactsList FXML error: {}", e.getMessage());
+        }
 
-//    public void onServerStart() {
-//        int serverLocalPort = 9034;
-//        int remotePort = 9033; // same as client receive
-//
-//        btnStartServer.setDisable(true);
-//
-//        UdpChoreographer udpChoreographer = new UdpChoreographer();
-//        ConnectionData connectionData = new ConnectionData();
-//        connectionData.setLocalPort(serverLocalPort);
-//        connectionData.setRemotePort(remotePort);
-//        udpChoreographer.startUdpServer(connectionData);
-//    }
+    }
+
+    public void closeContactsList() {
+        stageHolder.get("contactsList").getStage().close();
+    }
 
     public void onDisconnectClient() {
         closeApp();
     }
-
-//    public void onDisconnectServer() {
-//        closeApp();
-//    }
 
     public void onConnect() {
         String getHost = tfHost.getText()
@@ -157,9 +186,6 @@ public class MainController {
                 ? getHost.strip()
                 : "127.0.0.1";
 
-//        int localPort = 9033;
-//        int serverPort = 9034;
-
         btnConnect.setDisable(true);
         tfHost.setDisable(true);
         contactService.addContact("current", host);
@@ -168,12 +194,6 @@ public class MainController {
         EventService.getInstance().sendEvent(connectionEvent, contactService.getContactIp("current"));
         ClockService.getInstance().sendClockSync();
 
-//        UdpChoreographer udpChoreographer = new UdpChoreographer();
-//        ConnectionData connectionData = new ConnectionData();
-//        connectionData.setLocalPort(localPort);
-//        connectionData.setRemotePort(serverPort);
-//        connectionData.setRemoteHost(host);
-//        udpChoreographer.startUdpClient(connectionData);
     }
 
     public void closeApp() {

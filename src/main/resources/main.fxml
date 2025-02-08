@@ -23,6 +23,7 @@
             <Slider fx:id="slVolume" blockIncrement="1.0" disable="true" layoutX="30.0" layoutY="30.0" max="200.0" orientation="VERTICAL" value="100.0" />
             <ToggleButton fx:id="btnMuteMicro" disable="true" layoutX="54.0" layoutY="161.0" mnemonicParsing="false" text="Mute" />
             <Label fx:id="lblPing" layoutX="23.0" layoutY="15.0" />
+            <ToggleButton fx:id="btnContacts" onAction="#onContactsListButtonToggle" layoutX="248.0" layoutY="149.0" mnemonicParsing="false" text="Contacts" />
 
 
          </children>
