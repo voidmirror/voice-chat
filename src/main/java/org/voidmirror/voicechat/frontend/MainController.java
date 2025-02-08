@@ -152,16 +152,13 @@ public class MainController {
     }
 
     public void openContactsList() {
-        Stage contactsListStage = new Stage();
-        contactsListStage.setTitle("Contacts");
-        contactsListStage.setResizable(false);
-        contactsListStage.initStyle(StageStyle.UNDECORATED);
-        contactsListStage.setX(btnContacts.getScene().getWindow().getX() + backgroundPane.getWidth());
-        contactsListStage.setY(btnContacts.getScene().getWindow().getY());
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/contacts-list.fxml"));
-            Scene scene = new Scene(root);
-            contactsListStage.setScene(scene);
+            Stage contactsListStage = StageCreator.create(
+                    "contactsList",
+                    btnContacts.getScene().getWindow().getX() + backgroundPane.getWidth(),
+                    btnContacts.getScene().getWindow().getY(),
+                    "Contacts"
+            );
             stageHolder.put("contactsList", new StageParams(contactsListStage, backgroundPane.getWidth(), 0));
             contactsListStage.show();
         } catch (IOException e) {

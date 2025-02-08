@@ -8,6 +8,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.image.ImageView;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.HashMap;
 
@@ -30,6 +31,9 @@ public class FrontSwitcher {
 
     @Getter
     private static boolean isServer = false;
+    @Getter
+    @Setter
+    private static boolean isAddContactStageShown = false;
 
     private FxHolder fxHolder = new FxHolder();
 
