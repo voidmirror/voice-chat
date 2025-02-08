@@ -2,6 +2,7 @@ package org.voidmirror.voicechat.frontend;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ser.Serializers;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
@@ -20,6 +21,7 @@ import org.voidmirror.voicechat.misc.ComponentInitializer;
 import org.voidmirror.voicechat.misc.RuntimeConfig;
 import org.voidmirror.voicechat.model.ChatMessage;
 import org.voidmirror.voicechat.model.ConnectionData;
+import org.voidmirror.voicechat.service.ClockService;
 import org.voidmirror.voicechat.service.ContactService;
 import org.voidmirror.voicechat.service.MessageService;
 import org.voidmirror.voicechat.udp.UdpChoreographer;
@@ -37,10 +39,10 @@ public class MainController {
     private Button btnConnect;
     @FXML
     private Button btnDisconnect;
-    @FXML
-    private Button btnStartServer;
-    @FXML
-    private Button btnDisconnectServer;
+//    @FXML
+//    private Button btnStartServer;
+//    @FXML
+//    private Button btnDisconnectServer;
     @FXML
     private Button btnMinimize;
     @FXML
@@ -67,8 +69,8 @@ public class MainController {
         frontSwitcher = FrontSwitcher.getInstance();
         frontSwitcher
                 .addButtonToHolder(btnConnect, btnConnect.getId())
-                .addButtonToHolder(btnStartServer, btnStartServer.getId())
-                .addButtonToHolder(btnDisconnectServer, btnDisconnectServer.getId())
+//                .addButtonToHolder(btnStartServer, btnStartServer.getId())
+//                .addButtonToHolder(btnDisconnectServer, btnDisconnectServer.getId())
                 .addButtonToHolder(btnDisconnect, btnDisconnect.getId())
 
                 .addToggleButtonToHolder(btnMuteMicro, btnMuteMicro.getId())
@@ -122,32 +124,32 @@ public class MainController {
         ((Stage) btnMinimize.getScene().getWindow()).setIconified(true);
     }
 
-    public void onConnect() {
-        connect();
-    }
+//    public void onConnect() {
+//        connect();
+//    }
 
-    public void onServerStart() {
-        int serverLocalPort = 9034;
-        int remotePort = 9033; // same as client receive
-
-        btnStartServer.setDisable(true);
-
-        UdpChoreographer udpChoreographer = new UdpChoreographer();
-        ConnectionData connectionData = new ConnectionData();
-        connectionData.setLocalPort(serverLocalPort);
-        connectionData.setRemotePort(remotePort);
-        udpChoreographer.startUdpServer(connectionData);
-    }
+//    public void onServerStart() {
+//        int serverLocalPort = 9034;
+//        int remotePort = 9033; // same as client receive
+//
+//        btnStartServer.setDisable(true);
+//
+//        UdpChoreographer udpChoreographer = new UdpChoreographer();
+//        ConnectionData connectionData = new ConnectionData();
+//        connectionData.setLocalPort(serverLocalPort);
+//        connectionData.setRemotePort(remotePort);
+//        udpChoreographer.startUdpServer(connectionData);
+//    }
 
     public void onDisconnectClient() {
         closeApp();
     }
 
-    public void onDisconnectServer() {
-        closeApp();
-    }
+//    public void onDisconnectServer() {
+//        closeApp();
+//    }
 
-    private void connect() {
+    public void onConnect() {
         String getHost = tfHost.getText()
                 .replaceAll(" ", "")
                 .replaceAll("\\.+", ".");
@@ -155,19 +157,23 @@ public class MainController {
                 ? getHost.strip()
                 : "127.0.0.1";
 
-        int localPort = 9033;
-        int serverPort = 9034;
+//        int localPort = 9033;
+//        int serverPort = 9034;
 
         btnConnect.setDisable(true);
         tfHost.setDisable(true);
         contactService.addContact("current", host);
+        BaseEvent connectionEvent = new BaseEvent();
+        connectionEvent.setType(EventType.CONNECT);
+        EventService.getInstance().sendEvent(connectionEvent, contactService.getContactIp("current"));
+        ClockService.getInstance().sendClockSync();
 
-        UdpChoreographer udpChoreographer = new UdpChoreographer();
-        ConnectionData connectionData = new ConnectionData();
-        connectionData.setLocalPort(localPort);
-        connectionData.setRemotePort(serverPort);
-        connectionData.setRemoteHost(host);
-        udpChoreographer.startUdpClient(connectionData);
+//        UdpChoreographer udpChoreographer = new UdpChoreographer();
+//        ConnectionData connectionData = new ConnectionData();
+//        connectionData.setLocalPort(localPort);
+//        connectionData.setRemotePort(serverPort);
+//        connectionData.setRemoteHost(host);
+//        udpChoreographer.startUdpClient(connectionData);
     }
 
     public void closeApp() {

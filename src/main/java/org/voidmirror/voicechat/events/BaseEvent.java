@@ -1,5 +1,6 @@
 package org.voidmirror.voicechat.events;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;

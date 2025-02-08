@@ -8,12 +8,12 @@ import org.voidmirror.voicechat.model.ChatMessage;
 @Slf4j
 public class ChatEvent extends BaseEvent {
 
-    ObjectMapper mapper = new ObjectMapper();
     public void setChatMessage(ChatMessage chatMessage) {
+        ObjectMapper objectMapper = new ObjectMapper();
         try {
-            this.setPayload(mapper.writeValueAsString(chatMessage));
+            this.setPayload(objectMapper.writeValueAsString(chatMessage));
         } catch (JsonProcessingException e) {
-            log.error("Chat Message mapper error: {}", e.getMessage());
+            log.error("ChatMessage send mapper error: {}", e.getMessage());
         }
         this.setType(EventType.CHAT);
     }

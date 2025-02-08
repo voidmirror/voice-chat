@@ -10,5 +10,6 @@ module voice.chat {
     exports org.voidmirror.voicechat;
     exports org.voidmirror.voicechat.model;
     exports org.voidmirror.voicechat.events;
+    exports org.voidmirror.voicechat.dto;
     opens org.voidmirror.voicechat.frontend to javafx.fxml;
 }
