@@ -42,21 +42,22 @@ public class UdpReceiver implements Runnable{
         try {
             DatagramSocket datagramSocket = new DatagramSocket(port);
             datagramSocket.setSoTimeout(200);
-            final byte[] udpInputBuffer = new byte[Long.BYTES + 1024];
+            final byte[] udpInputBuffer = new byte[Long.BYTES + 13312];
 
             DatagramPacket dp = new DatagramPacket(udpInputBuffer, udpInputBuffer.length);
 
-            AudioFormat format = new AudioFormat(16000, 16, 2, true, true);
+            AudioFormat format = new AudioFormat(44100, 16, 1, true, false);
 
             DataLine.Info inInfo = new DataLine.Info(SourceDataLine.class, format);
             speakers = (SourceDataLine) AudioSystem.getLine(inInfo);
-            speakers.open(format, 1024);
+            speakers.open(format, 13312);
             speakers.start();
 
             LineHolder lineHolder = LineHolder.getInstance();
             lineHolder.addDataLine(speakers, "speakers");
             lineHolder.addFloatControl((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN), "volumeSpeakers");
-            
+
+            // System sound config
             System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getPrecision());
             System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMaximum());
             System.out.println(((FloatControl) speakers.getControl(FloatControl.Type.MASTER_GAIN)).getMinimum());
@@ -75,25 +76,31 @@ public class UdpReceiver implements Runnable{
             Thread speakerThread = new Thread(() -> {
                 ConcurrentLinkedQueue<Long> pingQueue = ComponentInitializer.getInstance().getPingQueue();
                 Clock clock = ClockService.getInstance().getClock();
+                long start;
+                long stop;
                 byte[] toWrite;
                 try {
                     while (Thread.currentThread().isAlive()) {
                         try {
+                            start = System.currentTimeMillis();
                             datagramSocket.receive(dp);
                             toWrite = dp.getData();
+                            stop = System.currentTimeMillis();
+                            System.out.println(stop - start);
                         } catch (SocketTimeoutException e) {
                             toWrite = null;
-                            speakers.flush();
+                                speakers.flush();
+                                pingQueue.clear();
                         }
                         if (toWrite != null) {
                             long time = Math.abs(clock.millis() - ByteUtils.bytesToLong(toWrite));
-                            if (time < 400) {
+//                            if (time < 400) {
                                 speakers.write(
                                         toWrite,
                                         Long.BYTES,
-                                        1024
+                                        13312
                                 );
-                            }
+//                            }
                             pingQueue.add(time);
                         }
                     }
@@ -121,6 +128,7 @@ public class UdpReceiver implements Runnable{
             });
 
             speakerThread.setDaemon(true);
+            speakerThread.setPriority(Thread.MAX_PRIORITY);
             speakerThread.start();
             pingThread.setDaemon(true);
             pingThread.start();

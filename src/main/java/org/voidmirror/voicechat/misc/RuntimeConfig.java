@@ -23,6 +23,9 @@ public class RuntimeConfig {
     @Getter
     @Setter
     private boolean isWhileNeeded = true;
+    @Getter
+    @Setter
+    private boolean microphoneFlushed = false;
 
     @Getter
     private final int servicePort = 9035;

@@ -53,6 +53,7 @@ public class EventHandler {
 
                 ConnectionData connectionData = new ConnectionData();
                 connectionData.setRemoteHost(ContactService.getInstance().getContactIp("current"));
+                connectionData.setVoicePort(RuntimeConfig.getInstance().getVoicePort());
                 UdpChoreographer.getInstance().startVoice(connectionData);
             }
             case CHAT -> {

@@ -34,6 +34,8 @@ public class ClockService {
 
     public void initClock(Clock baseClock, Duration millis) {
         clock = Clock.offset(baseClock, millis);
+        System.out.println("Current clock: " + System.currentTimeMillis());
+        System.out.println("Received clock: " + clock.millis());
     }
 
     public void sendClockSync() {
