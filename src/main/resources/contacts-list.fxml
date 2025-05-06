@@ -5,7 +5,7 @@
 
 <AnchorPane fx:id="backgroundPane" prefHeight="250.0" prefWidth="200.0" xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.voidmirror.voicechat.frontend.ContactsListController">
    <children>
-      <ListView layoutX="10.0" layoutY="10.0" prefHeight="180.0" prefWidth="180.0" />
+      <ListView fx:id="contactListView" layoutX="10.0" layoutY="10.0" prefHeight="180.0" prefWidth="180.0" />
       <Button fx:id="btnAddContact" onAction="#onAddContact" layoutX="46.0" layoutY="204.0" mnemonicParsing="false" text="Add" />
       <Button fx:id="btnEditContact" layoutX="116.0" layoutY="204.0" mnemonicParsing="false" text="Edit" />
    </children>
