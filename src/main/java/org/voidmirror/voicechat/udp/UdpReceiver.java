@@ -82,7 +82,7 @@ public class UdpReceiver implements Runnable{
                 try {
                     while (Thread.currentThread().isAlive()) {
                         try {
-                            start = System.currentTimeMillis();
+                            start = System.currentTimeMillis(); // todo: remove debug millis
                             datagramSocket.receive(dp);
                             toWrite = dp.getData();
                             stop = System.currentTimeMillis();
